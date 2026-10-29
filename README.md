@@ -1,23 +1,40 @@
-# AI Krishi Mitra — Full-stack farmer toolkit
-Flask + SQLite starter featuring:
-- Signup/login (password hashes)
-- Crop diary
-- Crop buy/sell marketplace listings
-- Crop photo upload and preview
-- Farm task planner with due dates and completion toggles
-- Expense tracker with categories and total
-- Harvest quantity/date records
-- General Hindi crop guidance endpoint
+# Gesture Hill Climb — full-stack starter
 
-## Run on Ubuntu/Linux
+A browser-based 2D hill-climb arcade game with hand-gesture driving.
+
+## Stack
+- React + Vite frontend
+- HTML Canvas game loop
+- MediaPipe Hands for in-browser gesture recognition
+- Express HTTP server and health endpoint
+- Socket.IO connection/presence scaffold
+
+## Requirements
+Node.js 20+ and npm.
+
+## Run locally
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -r requirements.txt
-cp .env.example .env
-python3 app.py
+npm install
+npm run dev
 ```
-Open http://127.0.0.1:5000
+Open the Vite URL shown in the terminal. Camera permissions are normally available on `localhost` or HTTPS. Gesture tracking downloads MediaPipe model assets from jsDelivr, so internet access is required. Keyboard controls work without camera access.
 
-## Important
-Marketplace entries are user-posted demo listings; there is no payment escrow, seller verification, delivery, or guaranteed market pricing. Photo upload only stores and previews an image; no AI disease diagnosis or medicine recommendation is connected. General advice is not a diagnosis. Consult a local KVK/agriculture officer before treatment decisions. Before public deployment, set a strong secret key, turn off debug mode, and add CSRF protection, access controls, rate limiting, and privacy controls.
+## Production build and server
+```bash
+npm install
+npm run build
+npm start
+```
+Open `http://localhost:3000`. Health check: `http://localhost:3000/api/health`.
+
+## Controls
+- Open palm: accelerate
+- Fist: brake
+- Move hand horizontally: lean while airborne
+- Keyboard: Right/D accelerate, Left/A brake, Up/W and Down/S lean, R restart
+
+## Deployment
+Deploy to a Node.js host that supports WebSockets (for example, Render or Railway). Build command: `npm install && npm run build`. Start command: `npm start`. Set `PORT` only if the platform requires it. Use HTTPS for camera permissions.
+
+## Scope notes
+This is a functional full-stack starter, not an exact commercial Hill Climb Racing clone. Socket.IO currently provides connection presence; there is no account system, cloud save, database-backed leaderboard, or shared multiplayer physics yet. Those can be added as next steps.
