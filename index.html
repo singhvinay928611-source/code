@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Neon Coast — Mobile Crime Action</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="game"></div>
+<div class="hud">
+ <div class="top-stats">
+  <div class="stats-left"><div class="clock" id="clock">22:27</div><div class="money" id="cash">$00050000</div><div class="health"><span>♥</span><b id="health">100</b></div><div class="wanted" id="wanted">★★★★★</div></div>
+  <button class="weapon" id="weaponButton" aria-label="Change weapon"><span class="weapon-art">✊</span><small>FIST</small></button>
+ </div>
+ <button class="home-button" id="homeButton" title="Reset position">⌂</button>
+ <div class="toast" id="toast">WELCOME TO SUNSET CITY</div><div class="police-alert" id="policeAlert"></div>
+ <div class="mission-chip"><span class="mission-dot"></span><div><small>MISSION</small><b id="missionTitle">FIRST DELIVERY</b><small id="missionText">Drive to the pink marker.</small></div><span class="mission-arrow">›</span></div><div class="mission-progress"><i id="progressBar"></i></div>
+ <div class="radar-wrap"><canvas id="map" width="180" height="180"></canvas><span class="radar-n">N</span></div>
+ <div class="right-actions">
+  <button class="action-button car-action" id="nextCar" aria-label="Change vehicle"><span>▰</span><small>CAR</small></button>
+  <button class="action-button" id="crimeButton" aria-label="Crime action"><span>✊</span><small>HIT</small></button>
+  <button class="action-button run-action" id="runButton" aria-label="Run"><span>♟</span><small>RUN</small></button>
+  <button class="action-button jump-action" id="jumpButton" aria-label="Jump"><span>↗</span><small>JUMP</small></button>
+ </div>
+ <div class="bottom-left-hint"><span class="dot"></span><span id="vehicleName">SUNSET COUPE</span></div>
+ <div class="wanted-label" id="wantedLabel">NO POLICE ALERT</div>
+ <div class="mobile-steer"><button id="leftButton">◀</button><button id="rightButton">▶</button></div>
+ <div class="speed-mini"><b id="speed">0</b><small>MPH</small></div>
+</div>
+<script type="module" src="/game.js"></script>
+</body></html>
