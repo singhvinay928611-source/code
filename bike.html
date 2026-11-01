@@ -1,0 +1,776 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bike Racing Game</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: #111827;
+  font-family: Arial, sans-serif;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.game {
+  width: min(95vw, 500px);
+  text-align: center;
+}
+
+h1 {
+  color: #facc15;
+  margin-bottom: 10px;
+  font-size: 32px;
+}
+
+.scoreboard {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1f2937;
+  border-radius: 10px 10px 0 0;
+  font-size: 17px;
+}
+
+canvas {
+  width: 100%;
+  display: block;
+  background: #374151;
+  border: 3px solid #facc15;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  background: #374151;
+  color: white;
+  cursor: pointer;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #4b5563;
+}
+
+#startBtn {
+  margin-top: 15px;
+  padding: 12px 30px;
+  background: #facc15;
+  color: #111827;
+  font-size: 17px;
+}
+
+.controls {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(3, 65px);
+  justify-content: center;
+  gap: 8px;
+}
+
+.controls button {
+  width: 65px;
+  height: 55px;
+}
+
+.up {
+  grid-column: 2;
+}
+
+.left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.down {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.help {
+  margin-top: 10px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+  <h1>🏍️ Bike Racing</h1>
+
+  <div class="scoreboard">
+    <span>Score: <b id="score">0</b></span>
+    <span>Coins: <b id="coins">0</b></span>
+    <span>Best: <b id="best">0</b></span>
+  </div>
+
+  <canvas id="gameCanvas" width="500" height="700"></canvas>
+
+  <button id="startBtn" onclick="startGame()">Start Race</button>
+
+  <div class="controls">
+    <button class="up" onclick="moveUp()">▲</button>
+    <button class="left" onclick="moveLeft()">◀</button>
+    <button class="down" onclick="moveDown()">▼</button>
+    <button class="right" onclick="moveRight()">▶</button>
+  </div>
+
+  <div class="help">
+    Arrow Keys / WASD to control the bike
+  </div>
+
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const scoreEl = document.getElementById("score");
+const coinsEl = document.getElementById("coins");
+const bestEl = document.getElementById("best");
+const startBtn = document.getElementById("startBtn");
+
+let gameRunning = false;
+let animationId;
+
+let score = 0;
+let coins = 0;
+let speed = 6;
+
+let best = localStorage.getItem("bikeBest") || 0;
+bestEl.textContent = best;
+
+// Road
+const road = {
+  x: 100,
+  width: 300
+};
+
+// Bike
+const bike = {
+  x: 225,
+  y: 580,
+  width: 50,
+  height: 90,
+  speed: 7
+};
+
+// Traffic
+let enemies = [];
+let coinItems = [];
+let trees = [];
+let roadLines = [];
+
+let spawnTimer = 0;
+let coinTimer = 0;
+let treeTimer = 0;
+
+// Keyboard state
+const keys = {};
+
+document.addEventListener("keydown", e => {
+  keys[e.key.toLowerCase()] = true;
+
+  if (
+    ["arrowup", "arrowdown", "arrowleft", "arrowright", " "]
+    .includes(e.key.toLowerCase())
+  ) {
+    e.preventDefault();
+  }
+
+  if (e.key === " " && !gameRunning) {
+    startGame();
+  }
+});
+
+document.addEventListener("keyup", e => {
+  keys[e.key.toLowerCase()] = false;
+});
+
+function startGame() {
+  cancelAnimationFrame(animationId);
+
+  score = 0;
+  coins = 0;
+  speed = 6;
+
+  enemies = [];
+  coinItems = [];
+  trees = [];
+  roadLines = [];
+
+  bike.x = 225;
+  bike.y = 580;
+
+  spawnTimer = 0;
+  coinTimer = 0;
+  treeTimer = 0;
+
+  scoreEl.textContent = score;
+  coinsEl.textContent = coins;
+
+  gameRunning = true;
+  startBtn.textContent = "Restart Race";
+
+  createRoadLines();
+
+  gameLoop();
+}
+
+function createRoadLines() {
+  roadLines = [];
+
+  for (let y = -100; y < canvas.height + 100; y += 100) {
+    roadLines.push({
+      y: y
+    });
+  }
+}
+
+function gameLoop() {
+  if (!gameRunning) return;
+
+  update();
+  draw();
+
+  animationId = requestAnimationFrame(gameLoop);
+}
+
+function update() {
+
+  // Bike movement
+  if (keys["arrowleft"] || keys["a"]) {
+    bike.x -= bike.speed;
+  }
+
+  if (keys["arrowright"] || keys["d"]) {
+    bike.x += bike.speed;
+  }
+
+  if (keys["arrowup"] || keys["w"]) {
+    bike.y -= bike.speed;
+  }
+
+  if (keys["arrowdown"] || keys["s"]) {
+    bike.y += bike.speed;
+  }
+
+  // Keep bike inside road
+  bike.x = Math.max(
+    road.x + 15,
+    Math.min(
+      road.x + road.width - bike.width - 15,
+      bike.x
+    )
+  );
+
+  bike.y = Math.max(20, Math.min(600, bike.y));
+
+  // Road movement
+  roadLines.forEach(line => {
+    line.y += speed;
+
+    if (line.y > canvas.height) {
+      line.y = -100;
+    }
+  });
+
+  // Spawn traffic
+  spawnTimer++;
+
+  if (spawnTimer > Math.max(30, 80 - speed * 4)) {
+    spawnEnemy();
+    spawnTimer = 0;
+  }
+
+  // Spawn coins
+  coinTimer++;
+
+  if (coinTimer > 100) {
+    spawnCoin();
+    coinTimer = 0;
+  }
+
+  // Spawn trees
+  treeTimer++;
+
+  if (treeTimer > 45) {
+    spawnTree();
+    treeTimer = 0;
+  }
+
+  // Move enemies
+  enemies.forEach(enemy => {
+    enemy.y += speed;
+  });
+
+  // Move coins
+  coinItems.forEach(coin => {
+    coin.y += speed;
+    coin.rotation += 0.1;
+  });
+
+  // Move trees
+  trees.forEach(tree => {
+    tree.y += speed;
+  });
+
+  // Remove objects
+  enemies = enemies.filter(e => e.y < canvas.height + 150);
+  coinItems = coinItems.filter(c => c.y < canvas.height + 50);
+  trees = trees.filter(t => t.y < canvas.height + 100);
+
+  // Collision with enemies
+  for (const enemy of enemies) {
+    if (collision(bike, enemy)) {
+      gameOver();
+      return;
+    }
+  }
+
+  // Coins
+  coinItems.forEach((coin, index) => {
+    if (circleCollision(bike, coin)) {
+      coins++;
+      score += 50;
+
+      coinItems.splice(index, 1);
+
+      coinsEl.textContent = coins;
+      scoreEl.textContent = score;
+    }
+  });
+
+  // Distance score
+  score++;
+  scoreEl.textContent = score;
+
+  // Increase speed
+  if (score % 500 === 0) {
+    speed += 0.5;
+  }
+
+  if (score > best) {
+    best = score;
+    bestEl.textContent = best;
+    localStorage.setItem("bikeBest", best);
+  }
+}
+
+function spawnEnemy() {
+  const lanes = [130, 200, 270, 340];
+
+  const lane = lanes[Math.floor(Math.random() * lanes.length)];
+
+  enemies.push({
+    x: lane,
+    y: -120,
+    width: 50,
+    height: 85,
+    color: randomColor()
+  });
+}
+
+function spawnCoin() {
+  const lanes = [140, 210, 280, 350];
+
+  const lane = lanes[Math.floor(Math.random() * lanes.length)];
+
+  coinItems.push({
+    x: lane + 15,
+    y: -30,
+    radius: 13,
+    rotation: 0
+  });
+}
+
+function spawnTree() {
+  const left = Math.random() > 0.5;
+
+  trees.push({
+    x: left
+      ? Math.random() * 70 + 10
+      : Math.random() * 70 + 420,
+    y: -70,
+    size: Math.random() * 15 + 25
+  });
+}
+
+function randomColor() {
+  const colors = [
+    "#ef4444",
+    "#3b82f6",
+    "#a855f7",
+    "#f97316",
+    "#14b8a6"
+  ];
+
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function collision(a, b) {
+  return (
+    a.x + 8 < b.x + b.width - 8 &&
+    a.x + a.width - 8 > b.x + 8 &&
+    a.y + 10 < b.y + b.height - 10 &&
+    a.y + a.height - 10 > b.y + 10
+  );
+}
+
+function circleCollision(bike, coin) {
+  const centerX = bike.x + bike.width / 2;
+  const centerY = bike.y + bike.height / 2;
+
+  const dx = centerX - coin.x;
+  const dy = centerY - coin.y;
+
+  return Math.sqrt(dx * dx + dy * dy) <
+    coin.radius + 25;
+}
+
+function draw() {
+
+  // Grass
+  ctx.fillStyle = "#166534";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Road
+  ctx.fillStyle = "#374151";
+  ctx.fillRect(
+    road.x,
+    0,
+    road.width,
+    canvas.height
+  );
+
+  // Road edges
+  ctx.fillStyle = "#facc15";
+  ctx.fillRect(road.x, 0, 6, canvas.height);
+  ctx.fillRect(
+    road.x + road.width - 6,
+    0,
+    6,
+    canvas.height
+  );
+
+  // Lane markings
+  ctx.fillStyle = "#f8fafc";
+
+  roadLines.forEach(line => {
+    ctx.fillRect(165, line.y, 8, 55);
+    ctx.fillRect(245, line.y, 8, 55);
+    ctx.fillRect(325, line.y, 8, 55);
+  });
+
+  // Trees
+  trees.forEach(drawTree);
+
+  // Coins
+  coinItems.forEach(drawCoin);
+
+  // Enemy vehicles
+  enemies.forEach(drawEnemy);
+
+  // Player bike
+  drawBike(
+    bike.x,
+    bike.y,
+    "#22c55e"
+  );
+}
+
+function drawBike(x, y, color) {
+
+  // Shadow
+  ctx.fillStyle = "rgba(0,0,0,0.3)";
+  ctx.beginPath();
+  ctx.ellipse(
+    x + 25,
+    y + 84,
+    25,
+    7,
+    0,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
+
+  // Wheels
+  ctx.fillStyle = "#111827";
+
+  ctx.beginPath();
+  ctx.arc(x + 25, y + 12, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x + 25, y + 76, 12, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Wheel rims
+  ctx.fillStyle = "#d1d5db";
+
+  ctx.beginPath();
+  ctx.arc(x + 25, y + 12, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(x + 25, y + 76, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Bike body
+  ctx.fillStyle = color;
+
+  ctx.beginPath();
+  ctx.moveTo(x + 25, y + 20);
+  ctx.lineTo(x + 10, y + 60);
+  ctx.lineTo(x + 40, y + 60);
+  ctx.closePath();
+  ctx.fill();
+
+  // Seat
+  ctx.fillStyle = "#111827";
+  ctx.fillRect(x + 14, y + 42, 22, 7);
+
+  // Handle
+  ctx.strokeStyle = "#d1d5db";
+  ctx.lineWidth = 4;
+
+  ctx.beginPath();
+  ctx.moveTo(x + 25, y + 20);
+  ctx.lineTo(x + 10, y + 5);
+  ctx.moveTo(x + 25, y + 20);
+  ctx.lineTo(x + 40, y + 5);
+  ctx.stroke();
+
+  // Headlight
+  ctx.fillStyle = "#fef08a";
+
+  ctx.beginPath();
+  ctx.arc(x + 25, y + 24, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Rider helmet
+  ctx.fillStyle = "#2563eb";
+
+  ctx.beginPath();
+  ctx.arc(x + 25, y + 36, 10, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawEnemy(enemy) {
+
+  // Shadow
+  ctx.fillStyle = "rgba(0,0,0,0.3)";
+  ctx.fillRect(
+    enemy.x + 5,
+    enemy.y + enemy.height,
+    enemy.width - 10,
+    6
+  );
+
+  // Body
+  ctx.fillStyle = enemy.color;
+  ctx.roundRect(
+    enemy.x,
+    enemy.y,
+    enemy.width,
+    enemy.height,
+    10
+  );
+  ctx.fill();
+
+  // Windows
+  ctx.fillStyle = "#bfdbfe";
+  ctx.fillRect(
+    enemy.x + 8,
+    enemy.y + 12,
+    enemy.width - 16,
+    22
+  );
+
+  // Wheels
+  ctx.fillStyle = "#111827";
+
+  ctx.fillRect(
+    enemy.x - 5,
+    enemy.y + 12,
+    7,
+    20
+  );
+
+  ctx.fillRect(
+    enemy.x + enemy.width - 2,
+    enemy.y + 12,
+    7,
+    20
+  );
+
+  ctx.fillRect(
+    enemy.x - 5,
+    enemy.y + enemy.height - 32,
+    7,
+    20
+  );
+
+  ctx.fillRect(
+    enemy.x + enemy.width - 2,
+    enemy.y + enemy.height - 32,
+    7,
+    20
+  );
+}
+
+function drawCoin(coin) {
+
+  ctx.save();
+
+  ctx.translate(coin.x, coin.y);
+  ctx.scale(Math.cos(coin.rotation), 1);
+
+  ctx.fillStyle = "#facc15";
+
+  ctx.beginPath();
+  ctx.arc(
+    0,
+    0,
+    coin.radius,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle = "#92400e";
+  ctx.font = "bold 15px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("$", 0, 1);
+
+  ctx.restore();
+}
+
+function drawTree(tree) {
+
+  // Trunk
+  ctx.fillStyle = "#78350f";
+
+  ctx.fillRect(
+    tree.x - 5,
+    tree.y + tree.size,
+    10,
+    tree.size
+  );
+
+  // Leaves
+  ctx.fillStyle = "#22c55e";
+
+  ctx.beginPath();
+  ctx.arc(
+    tree.x,
+    tree.y,
+    tree.size,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
+
+  ctx.fillStyle = "#16a34a";
+
+  ctx.beginPath();
+  ctx.arc(
+    tree.x - 10,
+    tree.y + 10,
+    tree.size * 0.65,
+    0,
+    Math.PI * 2
+  );
+  ctx.fill();
+}
+
+function gameOver() {
+
+  gameRunning = false;
+
+  cancelAnimationFrame(animationId);
+
+  // Overlay
+  ctx.fillStyle = "rgba(0,0,0,0.7)";
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+  ctx.textAlign = "center";
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 44px Arial";
+
+  ctx.fillText(
+    "RACE OVER",
+    canvas.width / 2,
+    300
+  );
+
+  ctx.font = "22px Arial";
+
+  ctx.fillText(
+    "Score: " + score,
+    canvas.width / 2,
+    345
+  );
+
+  ctx.fillText(
+    "Coins: " + coins,
+    canvas.width / 2,
+    380
+  );
+
+  startBtn.textContent = "Race Again";
+}
+
+// Button controls
+function moveLeft() {
+  if (gameRunning) bike.x -= bike.speed * 2;
+}
+
+function moveRight() {
+  if (gameRunning) bike.x += bike.speed * 2;
+}
+
+function moveUp() {
+  if (gameRunning) bike.y -= bike.speed * 2;
+}
+
+function moveDown() {
+  if (gameRunning) bike.y += bike.speed * 2;
+}
+
+// Initial screen
+draw();
+</script>
+
+</body>
+</html>
