@@ -1,0 +1,4152 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Landslide Early Warning System</title>
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #07111f;
+
+    color: #edf5ff;
+
+    min-height: 100vh;
+}
+
+header {
+
+    padding: 20px 5%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #10243a,
+            #081522
+        );
+
+    border-bottom:
+        1px solid #263c54;
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap: 20px;
+}
+
+header h1 {
+
+    font-size: 25px;
+
+}
+
+header p {
+
+    color: #91a5ba;
+
+    font-size: 13px;
+
+    margin-top: 6px;
+
+}
+
+.location {
+
+    text-align: right;
+
+}
+
+.location small {
+
+    color: #8196ad;
+
+    font-size: 11px;
+
+}
+
+#locationText {
+
+    color: #54d5ff;
+
+    font-weight: bold;
+
+    margin-top: 5px;
+
+}
+
+.container {
+
+    width: 92%;
+
+    max-width: 1450px;
+
+    margin: 25px auto;
+
+}
+
+
+/* =====================================================
+   SEARCH
+===================================================== */
+
+.search-panel {
+
+    background: #0d1a2c;
+
+    border:
+        1px solid #223750;
+
+    border-radius: 15px;
+
+    padding: 15px;
+
+    margin-bottom: 20px;
+
+}
+
+.search-title {
+
+    font-size: 16px;
+
+    font-weight: bold;
+
+    margin-bottom: 10px;
+
+}
+
+.search-row {
+
+    display: flex;
+
+    gap: 10px;
+
+}
+
+#citySearch {
+
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 12px 14px;
+
+    border-radius: 9px;
+
+    border:
+        1px solid #31475f;
+
+    background: #091525;
+
+    color: white;
+
+    outline: none;
+
+    font-size: 14px;
+
+}
+
+#citySearch:focus {
+
+    border-color:
+        #38c7ff;
+
+}
+
+#searchButton {
+
+    background:
+        #168bc5;
+
+    padding:
+        12px 18px;
+
+}
+
+#searchStatus {
+
+    color: #8da2b8;
+
+    font-size: 12px;
+
+    margin-top: 9px;
+
+}
+
+
+/* =====================================================
+   ALERT
+===================================================== */
+
+.alert {
+
+    padding: 18px;
+
+    border-radius: 15px;
+
+    margin-bottom: 20px;
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap: 15px;
+
+    border: 1px solid;
+
+}
+
+.alert.low {
+
+    background:
+        rgba(
+            0,
+            200,
+            120,
+            .10
+        );
+
+    border-color:
+        #00c878;
+
+}
+
+.alert.moderate {
+
+    background:
+        rgba(
+            255,
+            200,
+            50,
+            .10
+        );
+
+    border-color:
+        #ffc832;
+
+}
+
+.alert.high {
+
+    background:
+        rgba(
+            255,
+            130,
+            40,
+            .14
+        );
+
+    border-color:
+        #ff8228;
+
+}
+
+.alert.critical {
+
+    background:
+        rgba(
+            255,
+            35,
+            65,
+            .17
+        );
+
+    border-color:
+        #ff304f;
+
+}
+
+.emergency-active {
+
+    animation:
+        emergencyFlash
+        .65s
+        infinite;
+
+}
+
+@keyframes emergencyFlash {
+
+    50% {
+
+        box-shadow:
+            0 0 35px
+            rgba(
+                255,
+                30,
+                60,
+                .8
+            );
+
+    }
+
+}
+
+.alert-title {
+
+    font-size:
+        18px;
+
+    font-weight:
+        bold;
+
+}
+
+.alert-description {
+
+    color:
+        #9eb1c6;
+
+    margin-top:
+        6px;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.5;
+
+}
+
+.status {
+
+    padding:
+        9px 16px;
+
+    border-radius:
+        30px;
+
+    background:
+        #17283d;
+
+    font-weight:
+        bold;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+button {
+
+    border:
+        none;
+
+    background:
+        #168bc5;
+
+    color:
+        white;
+
+    padding:
+        11px 17px;
+
+    border-radius:
+        9px;
+
+    cursor:
+        pointer;
+
+    font-weight:
+        bold;
+
+}
+
+button:hover {
+
+    background:
+        #20a4e5;
+
+}
+
+button.danger {
+
+    background:
+        #b82d43;
+
+}
+
+button.success {
+
+    background:
+        #008f5a;
+
+}
+
+button.warning {
+
+    background:
+        #c88700;
+
+}
+
+
+/* =====================================================
+   ALARM
+===================================================== */
+
+.alarm-panel {
+
+    background:
+        #0d1a2c;
+
+    border:
+        1px solid #263b54;
+
+    border-radius:
+        14px;
+
+    padding:
+        15px;
+
+    margin-bottom:
+        20px;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap:
+        15px;
+
+}
+
+.alarm-info {
+
+    font-size:
+        13px;
+
+}
+
+.alarm-info strong {
+
+    display:
+        block;
+
+    margin-bottom:
+        4px;
+
+}
+
+.alarm-info span {
+
+    color:
+        #8da2b8;
+
+    font-size:
+        12px;
+
+}
+
+#enableAlarmButton.enabled {
+
+    background:
+        #008f5a;
+
+}
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.dashboard {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            1fr
+        );
+
+    gap:
+        15px;
+
+}
+
+.card {
+
+    background:
+        #0d1a2c;
+
+    border:
+        1px solid #223750;
+
+    border-radius:
+        15px;
+
+    padding:
+        20px;
+
+}
+
+.sensor {
+
+    min-height:
+        145px;
+
+}
+
+.sensor-name {
+
+    color:
+        #91a5bc;
+
+    font-size:
+        13px;
+
+    margin-bottom:
+        12px;
+
+}
+
+.sensor-value {
+
+    font-size:
+        31px;
+
+    font-weight:
+        bold;
+
+}
+
+.sensor-unit {
+
+    color:
+        #879bb1;
+
+    font-size:
+        13px;
+
+}
+
+.sensor-status {
+
+    color:
+        #61d8ad;
+
+    font-size:
+        12px;
+
+    margin-top:
+        12px;
+
+}
+
+
+/* =====================================================
+   MAIN GRID
+===================================================== */
+
+.main-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.5fr 1fr;
+
+    gap:
+        20px;
+
+    margin-top:
+        20px;
+
+}
+
+
+/* =====================================================
+   MAP
+===================================================== */
+
+#map {
+
+    height:
+        500px;
+
+    border-radius:
+        12px;
+
+    overflow:
+        hidden;
+
+}
+
+.map-title {
+
+    margin-bottom:
+        10px;
+
+}
+
+.map-description {
+
+    color:
+        #8da2b8;
+
+    font-size:
+        13px;
+
+    margin-bottom:
+        12px;
+
+}
+
+.coordinates {
+
+    background:
+        #091525;
+
+    padding:
+        15px;
+
+    border-radius:
+        10px;
+
+    margin-top:
+        12px;
+
+    font-family:
+        monospace;
+
+    color:
+        #66dfff;
+
+    font-size:
+        13px;
+
+}
+
+
+/* =====================================================
+   RISK
+===================================================== */
+
+.risk-card {
+
+    min-height:
+        500px;
+
+}
+
+.risk-circle {
+
+    width:
+        190px;
+
+    height:
+        190px;
+
+    border-radius:
+        50%;
+
+    margin:
+        30px auto;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    background:
+        conic-gradient(
+            #00c878
+            0deg,
+            #172b40
+            0deg
+        );
+
+    position:
+        relative;
+
+}
+
+.risk-circle::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        145px;
+
+    height:
+        145px;
+
+    border-radius:
+        50%;
+
+    background:
+        #0d1a2c;
+
+}
+
+#riskValue,
+#riskLabel {
+
+    position:
+        relative;
+
+    z-index:
+        2;
+
+}
+
+#riskValue {
+
+    font-size:
+        40px;
+
+    font-weight:
+        bold;
+
+}
+
+#riskLabel {
+
+    font-size:
+        12px;
+
+    margin-top:
+        3px;
+
+}
+
+.risk-message {
+
+    text-align:
+        center;
+
+    color:
+        #8fa4ba;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.5;
+
+}
+
+.factor {
+
+    margin-top:
+        20px;
+
+}
+
+.factor-row {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    font-size:
+        13px;
+
+    margin-bottom:
+        7px;
+
+}
+
+.bar {
+
+    width:
+        100%;
+
+    height:
+        8px;
+
+    background:
+        #1a2b40;
+
+    border-radius:
+        10px;
+
+    overflow:
+        hidden;
+
+}
+
+.bar-fill {
+
+    height:
+        100%;
+
+    width:
+        0%;
+
+    border-radius:
+        10px;
+
+    transition:
+        width .6s ease;
+
+}
+
+
+/* =====================================================
+   PHOTO REPORT
+===================================================== */
+
+.report-section {
+
+    margin-top:
+        20px;
+
+}
+
+.report-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        20px;
+
+}
+
+.upload-box {
+
+    border:
+        2px dashed #31506b;
+
+    border-radius:
+        13px;
+
+    padding:
+        25px;
+
+    text-align:
+        center;
+
+    background:
+        #091525;
+
+    cursor:
+        pointer;
+
+}
+
+.upload-box:hover {
+
+    border-color:
+        #38c7ff;
+
+}
+
+.upload-icon {
+
+    font-size:
+        45px;
+
+    margin-bottom:
+        10px;
+
+}
+
+#photoInput {
+
+    display:
+        none;
+
+}
+
+#preview {
+
+    width:
+        100%;
+
+    max-height:
+        300px;
+
+    object-fit:
+        cover;
+
+    border-radius:
+        10px;
+
+    margin-top:
+        15px;
+
+    display:
+        none;
+
+}
+
+.photo-result {
+
+    margin-top:
+        15px;
+
+    padding:
+        15px;
+
+    background:
+        #091525;
+
+    border-radius:
+        10px;
+
+    border:
+        1px solid #243b54;
+
+}
+
+.photo-result h3 {
+
+    margin-bottom:
+        8px;
+
+}
+
+#aiResult {
+
+    color:
+        #66dfff;
+
+    font-weight:
+        bold;
+
+}
+
+textarea {
+
+    width:
+        100%;
+
+    min-height:
+        100px;
+
+    resize:
+        vertical;
+
+    background:
+        #091525;
+
+    border:
+        1px solid #31475f;
+
+    color:
+        white;
+
+    border-radius:
+        9px;
+
+    padding:
+        12px;
+
+    margin-top:
+        8px;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+}
+
+select {
+
+    width:
+        100%;
+
+    padding:
+        11px;
+
+    background:
+        #091525;
+
+    border:
+        1px solid #31475f;
+
+    color:
+        white;
+
+    border-radius:
+        9px;
+
+    margin-top:
+        8px;
+
+}
+
+
+/* =====================================================
+   LOCAL ALERTS
+===================================================== */
+
+.local-alert {
+
+    margin-top:
+        20px;
+
+}
+
+.contact-list {
+
+    margin-top:
+        15px;
+
+}
+
+.contact {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    padding:
+        14px 0;
+
+    border-bottom:
+        1px solid #203349;
+
+}
+
+.contact-info strong {
+
+    display:
+        block;
+
+}
+
+.contact-info span {
+
+    color:
+        #8da2b8;
+
+    font-size:
+        12px;
+
+}
+
+.contact-buttons {
+
+    display:
+        flex;
+
+    gap:
+        7px;
+
+}
+
+.contact-buttons a {
+
+    text-decoration:
+        none;
+
+    padding:
+        8px 10px;
+
+    border-radius:
+        7px;
+
+    font-size:
+        12px;
+
+    color:
+        white;
+
+    background:
+        #168bc5;
+
+}
+
+
+/* =====================================================
+   REPORT HISTORY
+===================================================== */
+
+.history {
+
+    margin-top:
+        20px;
+
+}
+
+.history-item {
+
+    padding:
+        15px 0;
+
+    border-bottom:
+        1px solid #203349;
+
+}
+
+.history-top {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+}
+
+.history-image {
+
+    width:
+        70px;
+
+    height:
+        55px;
+
+    object-fit:
+        cover;
+
+    border-radius:
+        7px;
+
+    margin-top:
+        8px;
+
+}
+
+.history-location {
+
+    color:
+        #66dfff;
+
+    font-size:
+        11px;
+
+    margin-top:
+        5px;
+
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+
+    text-align:
+        center;
+
+    color:
+        #60758d;
+
+    font-size:
+        12px;
+
+    padding:
+        30px;
+
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:1000px) {
+
+    .dashboard {
+
+        grid-template-columns:
+            repeat(
+                2,
+                1fr
+            );
+
+    }
+
+    .main-grid,
+    .report-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+@media(max-width:600px) {
+
+    header {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+    }
+
+    .location {
+
+        text-align:
+            left;
+
+    }
+
+    .dashboard {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+    .container {
+
+        width:
+            95%;
+
+    }
+
+    #map {
+
+        height:
+            400px;
+
+    }
+
+    .search-row {
+
+        flex-direction:
+            column;
+
+    }
+
+    .alarm-panel {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+    }
+
+    .contact {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+
+        gap:
+            10px;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header>
+
+    <div>
+
+        <h1>
+            ⛰️ AI Landslide Early Warning
+        </h1>
+
+        <p>
+            Landslide monitoring • AI analysis •
+            Photo reporting • Local emergency alerts
+        </p>
+
+    </div>
+
+
+    <div class="location">
+
+        <small>
+            SELECTED LOCATION
+        </small>
+
+        <div id="locationText">
+            Select a location
+        </div>
+
+    </div>
+
+</header>
+
+
+<div class="container">
+
+
+<!-- =====================================================
+     CITY SEARCH
+===================================================== -->
+
+<div class="search-panel">
+
+    <div class="search-title">
+        🔎 Search City / Location
+    </div>
+
+
+    <div class="search-row">
+
+        <input
+            id="citySearch"
+            type="text"
+            placeholder="Example: Shimla, India"
+        >
+
+        <button id="searchButton">
+            Search
+        </button>
+
+    </div>
+
+
+    <div id="searchStatus">
+
+        Search for a city and then
+        click on the map to inspect another point.
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ALERT
+===================================================== -->
+
+<div
+    id="alertBox"
+    class="alert low"
+>
+
+    <div>
+
+        <div
+            id="alertTitle"
+            class="alert-title"
+        >
+            🟢 LOW LANDSLIDE RISK
+        </div>
+
+        <div
+            id="alertDescription"
+            class="alert-description"
+        >
+            Select a location to analyze conditions.
+        </div>
+
+    </div>
+
+
+    <div
+        id="status"
+        class="status"
+    >
+        SAFE
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ALARM
+===================================================== -->
+
+<div class="alarm-panel">
+
+    <div class="alarm-info">
+
+        <strong>
+            🔊 Emergency Alarm
+        </strong>
+
+        <span id="alarmStatus">
+
+            Enable the alarm.
+            It will activate automatically at
+            60% or higher risk.
+
+        </span>
+
+    </div>
+
+
+    <div>
+
+        <button id="enableAlarmButton">
+
+            🔊 Enable Alarm
+
+        </button>
+
+
+        <button
+            id="stopAlarmButton"
+            class="danger"
+            style="display:none;"
+        >
+
+            🔇 Stop Alarm
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SENSOR CARDS
+===================================================== -->
+
+<div class="dashboard">
+
+
+    <div class="card sensor">
+
+        <div class="sensor-name">
+            🌧️ RAINFALL
+        </div>
+
+        <span
+            id="rainfall"
+            class="sensor-value"
+        >
+            --
+        </span>
+
+        <span class="sensor-unit">
+            mm
+        </span>
+
+        <div
+            id="rainStatus"
+            class="sensor-status"
+        >
+            Waiting
+        </div>
+
+    </div>
+
+
+    <div class="card sensor">
+
+        <div class="sensor-name">
+            💧 HUMIDITY
+        </div>
+
+        <span
+            id="humidity"
+            class="sensor-value"
+        >
+            --
+        </span>
+
+        <span class="sensor-unit">
+            %
+        </span>
+
+        <div class="sensor-status">
+            Atmospheric humidity
+        </div>
+
+    </div>
+
+
+    <div class="card sensor">
+
+        <div class="sensor-name">
+            🌱 SOIL MOISTURE
+        </div>
+
+        <span
+            id="soil"
+            class="sensor-value"
+        >
+            --
+        </span>
+
+        <span class="sensor-unit">
+            %
+        </span>
+
+        <div class="sensor-status">
+            Estimated
+        </div>
+
+    </div>
+
+
+    <div class="card sensor">
+
+        <div class="sensor-name">
+            🌡️ TEMPERATURE
+        </div>
+
+        <span
+            id="temperature"
+            class="sensor-value"
+        >
+            --
+        </span>
+
+        <span class="sensor-unit">
+            °C
+        </span>
+
+        <div class="sensor-status">
+            Local temperature
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MAP + RISK
+===================================================== -->
+
+<div class="main-grid">
+
+
+    <!-- MAP -->
+
+    <div class="card">
+
+        <h2 class="map-title">
+            🗺️ Interactive Risk Map
+        </h2>
+
+        <p class="map-description">
+
+            Search a city or click anywhere on the map.
+            Photo reports will be placed at the selected
+            location.
+
+        </p>
+
+
+        <div id="map"></div>
+
+
+        <div class="coordinates">
+
+            Latitude:
+            <span id="latitude">
+                --
+            </span>
+
+            <br>
+
+            Longitude:
+            <span id="longitude">
+                --
+            </span>
+
+        </div>
+
+
+        <button id="locationButton">
+
+            📍 Use My Location
+
+        </button>
+
+    </div>
+
+
+    <!-- RISK -->
+
+    <div class="card risk-card">
+
+        <h2>
+            🤖 AI Risk Assessment
+        </h2>
+
+
+        <div
+            id="riskCircle"
+            class="risk-circle"
+        >
+
+            <div id="riskValue">
+                --
+            </div>
+
+            <div id="riskLabel">
+                WAITING
+            </div>
+
+        </div>
+
+
+        <div
+            id="riskMessage"
+            class="risk-message"
+        >
+
+            Select a location.
+
+        </div>
+
+
+        <div class="factor">
+
+            <div class="factor-row">
+
+                <span>
+                    Rainfall Risk
+                </span>
+
+                <span id="rainFactor">
+                    0%
+                </span>
+
+            </div>
+
+            <div class="bar">
+
+                <div
+                    id="rainBar"
+                    class="bar-fill"
+                    style="background:#ffc857;"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="factor">
+
+            <div class="factor-row">
+
+                <span>
+                    Soil Moisture
+                </span>
+
+                <span id="soilFactor">
+                    0%
+                </span>
+
+            </div>
+
+            <div class="bar">
+
+                <div
+                    id="soilBar"
+                    class="bar-fill"
+                    style="background:#38d39f;"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="factor">
+
+            <div class="factor-row">
+
+                <span>
+                    Terrain Slope
+                </span>
+
+                <span id="slopeFactor">
+                    0%
+                </span>
+
+            </div>
+
+            <div class="bar">
+
+                <div
+                    id="slopeBar"
+                    class="bar-fill"
+                    style="background:#ff8a4c;"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="factor">
+
+            <div class="factor-row">
+
+                <span>
+                    Ground Movement
+                </span>
+
+                <span id="movementFactor">
+                    0%
+                </span>
+
+            </div>
+
+            <div class="bar">
+
+                <div
+                    id="movementBar"
+                    class="bar-fill"
+                    style="background:#ff4d67;"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PHOTO REPORTING
+===================================================== -->
+
+<div class="report-section">
+
+
+<div class="report-grid">
+
+
+    <!-- UPLOAD -->
+
+    <div class="card">
+
+        <h2>
+            📷 Report a Landslide
+        </h2>
+
+        <p
+            style="
+                color:#8da2b8;
+                font-size:13px;
+                margin-top:7px;
+            "
+        >
+
+            Upload a photograph of a suspected
+            landslide. The report will be associated
+            with the currently selected map location.
+
+        </p>
+
+
+        <label
+            class="upload-box"
+            for="photoInput"
+            style="display:block;margin-top:15px;"
+        >
+
+            <div class="upload-icon">
+                📷
+            </div>
+
+            <strong>
+                Click to upload a photo
+            </strong>
+
+            <p
+                style="
+                    color:#8196ad;
+                    font-size:12px;
+                    margin-top:6px;
+                "
+            >
+
+                JPG, PNG or WEBP
+
+            </p>
+
+        </label>
+
+
+        <input
+            type="file"
+            id="photoInput"
+            accept="image/*"
+        >
+
+
+        <img
+            id="preview"
+            alt="Uploaded landslide image"
+        >
+
+
+        <div
+            id="photoResult"
+            class="photo-result"
+            style="display:none;"
+        >
+
+            <h3>
+                🤖 AI Image Assessment
+            </h3>
+
+            <p>
+                Result:
+                <strong id="aiResult">
+                    --
+                </strong>
+            </p>
+
+            <p
+                id="aiExplanation"
+                style="
+                    color:#8da2b8;
+                    font-size:12px;
+                    margin-top:6px;
+                "
+            >
+                --
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- REPORT DETAILS -->
+
+    <div class="card">
+
+        <h2>
+            📝 Report Details
+        </h2>
+
+
+        <label
+            style="
+                display:block;
+                margin-top:15px;
+                font-size:13px;
+            "
+        >
+
+            Suspected Severity
+
+        </label>
+
+
+        <select id="severity">
+
+            <option value="low">
+                Low
+            </option>
+
+            <option value="moderate">
+                Moderate
+            </option>
+
+            <option value="high">
+                High
+            </option>
+
+            <option value="critical">
+                Critical
+            </option>
+
+        </select>
+
+
+        <label
+            style="
+                display:block;
+                margin-top:15px;
+                font-size:13px;
+            "
+        >
+
+            Description
+
+        </label>
+
+
+        <textarea
+            id="description"
+            placeholder="Describe what you observed..."
+        ></textarea>
+
+
+        <div
+            style="
+                margin-top:12px;
+                padding:10px;
+                background:#091525;
+                border-radius:8px;
+                color:#66dfff;
+                font-family:monospace;
+                font-size:11px;
+            "
+        >
+
+            Report location:
+            <br>
+
+            <span id="reportLatitude">
+                --
+            </span>
+
+            ,
+
+            <span id="reportLongitude">
+                --
+            </span>
+
+        </div>
+
+
+        <button
+            id="analyzePhotoButton"
+            style="margin-top:15px;"
+        >
+
+            🤖 Analyze Photo
+
+        </button>
+
+
+        <button
+            id="submitReportButton"
+            class="danger"
+            style="margin-top:15px;"
+        >
+
+            🚨 Submit Landslide Report
+
+        </button>
+
+    </div>
+
+
+</div>
+
+</div>
+
+
+<!-- =====================================================
+     LOCAL ALERTS
+===================================================== -->
+
+<div class="card local-alert">
+
+    <h2>
+        📢 Local Emergency Alerts
+    </h2>
+
+    <p
+        style="
+            color:#8da2b8;
+            font-size:13px;
+            margin-top:6px;
+        "
+    >
+
+        These are demonstration contacts.
+        In production, connect this section to your
+        official emergency notification backend.
+
+    </p>
+
+
+    <div class="contact-list">
+
+
+        <div class="contact">
+
+            <div class="contact-info">
+
+                <strong>
+                    🏘️ Local Community
+                </strong>
+
+                <span>
+                    Registered residents
+                </span>
+
+            </div>
+
+
+            <div class="contact-buttons">
+
+                <a href="sms:?body=LANDSLIDE%20WARNING%3A%20Please%20move%20to%20a%20safe%20location%20and%20follow%20local%20authorities.">
+
+                    SMS
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="contact">
+
+            <div class="contact-info">
+
+                <strong>
+                    🚑 Emergency Response
+                </strong>
+
+                <span>
+                    Local emergency team
+                </span>
+
+            </div>
+
+
+            <div class="contact-buttons">
+
+                <a href="tel:112">
+
+                    Call 112
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="contact">
+
+            <div class="contact-info">
+
+                <strong>
+                    🏛️ Disaster Management
+                </strong>
+
+                <span>
+                    Authority / control room
+                </span>
+
+            </div>
+
+
+            <div class="contact-buttons">
+
+                <a href="sms:?body=LANDSLIDE%20REPORT%3A%20A%20potential%20landslide%20has%20been%20reported.%20Please%20verify%20the%20location.">
+
+                    SMS
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <button
+        id="sendLocalAlertButton"
+        class="danger"
+        style="
+            margin-top:18px;
+            width:100%;
+        "
+    >
+
+        📢 SEND EMERGENCY LOCAL ALERT
+
+    </button>
+
+
+    <div
+        id="localAlertStatus"
+        style="
+            color:#8da2b8;
+            font-size:12px;
+            margin-top:10px;
+        "
+    >
+
+        No emergency alert sent.
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     REPORT HISTORY
+===================================================== -->
+
+<div class="card history">
+
+    <h2>
+        📋 Landslide Reports
+    </h2>
+
+    <div id="historyList">
+
+        <div class="history-item">
+
+            <div class="history-top">
+
+                <strong>
+                    System
+                </strong>
+
+                <span>
+                    Monitoring active
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="footer">
+
+    AI Landslide Early Warning System
+    • Prototype
+
+</div>
+
+
+</div>
+
+
+<!-- =====================================================
+     LEAFLET
+===================================================== -->
+
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<script>
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let selectedLatitude =
+    28.6139;
+
+let selectedLongitude =
+    77.2090;
+
+let marker;
+
+let landslideMarkers = [];
+
+let uploadedImage = null;
+
+
+/* =====================================================
+   ALARM
+===================================================== */
+
+let alarmEnabled =
+    false;
+
+let alarmPlaying =
+    false;
+
+let audioContext =
+    null;
+
+let alarmTimer =
+    null;
+
+let emergencyAlreadyShown =
+    false;
+
+
+/* =====================================================
+   MAP
+===================================================== */
+
+const map =
+    L.map("map")
+    .setView(
+        [
+            selectedLatitude,
+            selectedLongitude
+        ],
+        6
+    );
+
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+
+        maxZoom:
+            19,
+
+        attribution:
+            "&copy; OpenStreetMap contributors"
+
+    }
+).addTo(map);
+
+
+marker =
+    L.marker(
+        [
+            selectedLatitude,
+            selectedLongitude
+        ]
+    )
+    .addTo(map);
+
+
+/* =====================================================
+   MAP CLICK
+===================================================== */
+
+map.on(
+    "click",
+    function(event) {
+
+        selectLocation(
+            event.latlng.lat,
+            event.latlng.lng
+        );
+
+    }
+);
+
+
+/* =====================================================
+   SELECT LOCATION
+===================================================== */
+
+async function selectLocation(
+    latitude,
+    longitude
+) {
+
+    selectedLatitude =
+        latitude;
+
+    selectedLongitude =
+        longitude;
+
+
+    document.getElementById(
+        "latitude"
+    ).innerText =
+        latitude.toFixed(6);
+
+
+    document.getElementById(
+        "longitude"
+    ).innerText =
+        longitude.toFixed(6);
+
+
+    document.getElementById(
+        "reportLatitude"
+    ).innerText =
+        latitude.toFixed(6);
+
+
+    document.getElementById(
+        "reportLongitude"
+    ).innerText =
+        longitude.toFixed(6);
+
+
+    document.getElementById(
+        "locationText"
+    ).innerText =
+        latitude.toFixed(4)
+        +
+        ", "
+        +
+        longitude.toFixed(4);
+
+
+    marker.setLatLng(
+        [
+            latitude,
+            longitude
+        ]
+    );
+
+
+    marker.bindPopup(
+        `
+        <b>📍 Monitoring Point</b>
+        <br>
+        Latitude:
+        ${latitude.toFixed(5)}
+        <br>
+        Longitude:
+        ${longitude.toFixed(5)}
+        `
+    );
+
+
+    await loadWeather(
+        latitude,
+        longitude
+    );
+
+}
+
+
+/* =====================================================
+   CITY SEARCH
+===================================================== */
+
+document.getElementById(
+    "searchButton"
+).addEventListener(
+    "click",
+    searchCity
+);
+
+
+document.getElementById(
+    "citySearch"
+).addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            searchCity();
+
+        }
+
+    }
+);
+
+
+async function searchCity() {
+
+    const city =
+        document.getElementById(
+            "citySearch"
+        ).value.trim();
+
+
+    if (!city) {
+
+        document.getElementById(
+            "searchStatus"
+        ).innerText =
+            "Please enter a city.";
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "searchStatus"
+    ).innerText =
+        "🔎 Searching...";
+
+
+    try {
+
+
+        const url =
+            "https://nominatim.openstreetmap.org/search"
+            +
+            "?format=json"
+            +
+            "&limit=1"
+            +
+            "&q="
+            +
+            encodeURIComponent(
+                city
+            );
+
+
+        const response =
+            await fetch(
+                url
+            );
+
+
+        const results =
+            await response.json();
+
+
+        if (
+            !results.length
+        ) {
+
+            document.getElementById(
+                "searchStatus"
+            ).innerText =
+                "❌ Location not found.";
+
+            return;
+
+        }
+
+
+        const result =
+            results[0];
+
+
+        const lat =
+            parseFloat(
+                result.lat
+            );
+
+
+        const lng =
+            parseFloat(
+                result.lon
+            );
+
+
+        map.setView(
+            [
+                lat,
+                lng
+            ],
+            12
+        );
+
+
+        document.getElementById(
+            "searchStatus"
+        ).innerText =
+            "✅ Found: "
+            +
+            result.display_name;
+
+
+        selectLocation(
+            lat,
+            lng
+        );
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+
+        document.getElementById(
+            "searchStatus"
+        ).innerText =
+            "❌ Search failed.";
+
+    }
+
+}
+
+
+/* =====================================================
+   WEATHER
+===================================================== */
+
+async function loadWeather(
+    latitude,
+    longitude
+) {
+
+    try {
+
+
+        const url =
+            "https://api.open-meteo.com/v1/forecast"
+            +
+            "?latitude="
+            +
+            latitude
+            +
+            "&longitude="
+            +
+            longitude
+            +
+            "&current="
+            +
+            "temperature_2m,"
+            +
+            "relative_humidity_2m,"
+            +
+            "precipitation,"
+            +
+            "rain"
+            +
+            "&forecast_days=1";
+
+
+        const response =
+            await fetch(
+                url
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Weather error"
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        const temperature =
+            data.current
+                .temperature_2m;
+
+
+        const humidity =
+            data.current
+                .relative_humidity_2m;
+
+
+        const precipitation =
+            data.current
+                .precipitation;
+
+
+        const rain =
+            data.current
+                .rain;
+
+
+        const rainfall =
+            Math.max(
+                precipitation,
+                rain
+            );
+
+
+        document.getElementById(
+            "temperature"
+        ).innerText =
+            Number(
+                temperature
+            ).toFixed(1);
+
+
+        document.getElementById(
+            "humidity"
+        ).innerText =
+            Number(
+                humidity
+            ).toFixed(1);
+
+
+        document.getElementById(
+            "rainfall"
+        ).innerText =
+            Number(
+                rainfall
+            ).toFixed(1);
+
+
+        document.getElementById(
+            "rainStatus"
+        ).innerText =
+            getRainStatus(
+                rainfall
+            );
+
+
+        const terrain =
+            generateTerrainData(
+                latitude,
+                longitude
+            );
+
+
+        document.getElementById(
+            "soil"
+        ).innerText =
+            terrain.soil.toFixed(1);
+
+
+        calculateRisk({
+
+            rainfall:
+                rainfall,
+
+            humidity:
+                humidity,
+
+            soil:
+                terrain.soil,
+
+            slope:
+                terrain.slope,
+
+            movement:
+                terrain.movement
+
+        });
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+        document.getElementById(
+            "riskMessage"
+        ).innerText =
+            "Weather data unavailable.";
+
+    }
+
+}
+
+
+/* =====================================================
+   RAIN
+===================================================== */
+
+function getRainStatus(
+    rainfall
+) {
+
+    if (
+        rainfall >= 30
+    )
+        return "🚨 Extremely heavy";
+
+
+    if (
+        rainfall >= 15
+    )
+        return "⚠️ Heavy rainfall";
+
+
+    if (
+        rainfall >= 5
+    )
+        return "Moderate rainfall";
+
+
+    return "Normal rainfall";
+
+}
+
+
+/* =====================================================
+   TERRAIN DEMO
+===================================================== */
+
+function generateTerrainData(
+    latitude,
+    longitude
+) {
+
+    /*
+        DEMONSTRATION VALUES.
+
+        Replace these with real DEM,
+        satellite and IoT data.
+    */
+
+    const seed =
+        Math.abs(
+            Math.sin(
+                latitude *
+                12.9898
+                +
+                longitude *
+                78.233
+            )
+        );
+
+
+    return {
+
+        soil:
+            Math.min(
+                35 +
+                seed *
+                60,
+                100
+            ),
+
+        slope:
+            5 +
+            seed *
+            40,
+
+        movement:
+            seed *
+            12
+
+    };
+
+}
+
+
+/* =====================================================
+   RISK MODEL
+===================================================== */
+
+function calculateRisk(
+    data
+) {
+
+    const rainfallRisk =
+        Math.min(
+            data.rainfall /
+            30,
+            1
+        )
+        *
+        30;
+
+
+    const humidityRisk =
+        data.humidity /
+        100
+        *
+        10;
+
+
+    const soilRisk =
+        data.soil /
+        100
+        *
+        25;
+
+
+    const slopeRisk =
+        Math.min(
+            data.slope /
+            45,
+            1
+        )
+        *
+        20;
+
+
+    const movementRisk =
+        Math.min(
+            data.movement /
+            12,
+            1
+        )
+        *
+        15;
+
+
+    let risk =
+        rainfallRisk
+        +
+        humidityRisk
+        +
+        soilRisk
+        +
+        slopeRisk
+        +
+        movementRisk;
+
+
+    risk =
+        Math.round(
+            Math.min(
+                risk,
+                100
+            )
+        );
+
+
+    updateRiskUI(
+
+        risk,
+
+        rainfallRisk,
+
+        soilRisk,
+
+        slopeRisk,
+
+        movementRisk
+
+    );
+
+}
+
+
+/* =====================================================
+   RISK UI
+===================================================== */
+
+function updateRiskUI(
+
+    risk,
+
+    rainfallRisk,
+
+    soilRisk,
+
+    slopeRisk,
+
+    movementRisk
+
+) {
+
+    let level;
+
+    let color;
+
+    let description;
+
+
+    if (
+        risk >= 80
+    ) {
+
+        level =
+            "CRITICAL";
+
+        color =
+            "#ff304f";
+
+        description =
+            "🚨 CRITICAL landslide risk detected.";
+
+    }
+
+    else if (
+        risk >= 60
+    ) {
+
+        level =
+            "HIGH";
+
+        color =
+            "#ff8738";
+
+        description =
+            "🚨 VERY HIGH landslide risk. Emergency alarm threshold reached.";
+
+    }
+
+    else if (
+        risk >= 35
+    ) {
+
+        level =
+            "MODERATE";
+
+        color =
+            "#ffc857";
+
+        description =
+            "🟡 Moderate instability indicators detected.";
+
+    }
+
+    else {
+
+        level =
+            "LOW";
+
+        color =
+            "#00c878";
+
+        description =
+            "🟢 Current conditions appear relatively stable.";
+
+    }
+
+
+    document.getElementById(
+        "riskValue"
+    ).innerText =
+        risk + "%";
+
+
+    document.getElementById(
+        "riskLabel"
+    ).innerText =
+        level;
+
+
+    document.getElementById(
+        "riskLabel"
+    ).style.color =
+        color;
+
+
+    document.getElementById(
+        "riskCircle"
+    ).style.background =
+
+        `
+        conic-gradient(
+            ${color}
+            ${risk * 3.6}deg,
+            #172b40
+            ${risk * 3.6}deg
+        )
+        `;
+
+
+    document.getElementById(
+        "riskMessage"
+    ).innerText =
+        description;
+
+
+    const alertBox =
+        document.getElementById(
+            "alertBox"
+        );
+
+
+    alertBox.className =
+        "alert "
+        +
+        level.toLowerCase();
+
+
+    document.getElementById(
+        "alertTitle"
+    ).innerText =
+        getIcon(level)
+        +
+        " "
+        +
+        level
+        +
+        " LANDSLIDE RISK";
+
+
+    document.getElementById(
+        "alertDescription"
+    ).innerText =
+        description;
+
+
+    document.getElementById(
+        "status"
+    ).innerText =
+        level;
+
+
+    setFactor(
+        "rainFactor",
+        "rainBar",
+        Math.round(
+            rainfallRisk /
+            30 *
+            100
+        )
+    );
+
+
+    setFactor(
+        "soilFactor",
+        "soilBar",
+        Math.round(
+            soilRisk /
+            25 *
+            100
+        )
+    );
+
+
+    setFactor(
+        "slopeFactor",
+        "slopeBar",
+        Math.round(
+            slopeRisk /
+            20 *
+            100
+        )
+    );
+
+
+    setFactor(
+        "movementFactor",
+        "movementBar",
+        Math.round(
+            movementRisk /
+            15 *
+            100
+        )
+    );
+
+
+    /*
+        60% = alarm.
+    */
+
+    if (
+        risk >= 60
+    ) {
+
+        startEmergencyAlarm(
+            risk
+        );
+
+    }
+
+    else {
+
+        stopEmergencyAlarm();
+
+        emergencyAlreadyShown =
+            false;
+
+    }
+
+}
+
+
+/* =====================================================
+   FACTORS
+===================================================== */
+
+function setFactor(
+    textId,
+    barId,
+    value
+) {
+
+    value =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                value
+            )
+        );
+
+
+    document.getElementById(
+        textId
+    ).innerText =
+        value + "%";
+
+
+    document.getElementById(
+        barId
+    ).style.width =
+        value + "%";
+
+}
+
+
+/* =====================================================
+   ICON
+===================================================== */
+
+function getIcon(
+    level
+) {
+
+    if (
+        level === "CRITICAL"
+    )
+        return "🚨";
+
+
+    if (
+        level === "HIGH"
+    )
+        return "🚨";
+
+
+    if (
+        level === "MODERATE"
+    )
+        return "🟡";
+
+
+    return "🟢";
+
+}
+
+
+/* =====================================================
+   ENABLE ALARM
+===================================================== */
+
+document.getElementById(
+    "enableAlarmButton"
+).addEventListener(
+    "click",
+    async function() {
+
+        try {
+
+            audioContext =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+
+            await
+                audioContext.resume();
+
+
+            alarmEnabled =
+                true;
+
+
+            this.classList.add(
+                "enabled"
+            );
+
+
+            this.innerText =
+                "🔊 Alarm Enabled";
+
+
+            document.getElementById(
+                "alarmStatus"
+            ).innerText =
+                "Alarm ready — activates at 60%+.";
+
+        }
+
+        catch(error) {
+
+            console.error(
+                error
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   SIREN
+===================================================== */
+
+function createSirenSound() {
+
+    if (
+        !audioContext ||
+        !alarmEnabled
+    )
+        return;
+
+
+    const oscillator =
+        audioContext
+            .createOscillator();
+
+
+    const gain =
+        audioContext
+            .createGain();
+
+
+    const now =
+        audioContext.currentTime;
+
+
+    oscillator.type =
+        "sawtooth";
+
+
+    oscillator.frequency
+        .setValueAtTime(
+            500,
+            now
+        );
+
+
+    oscillator.frequency
+        .linearRampToValueAtTime(
+            1000,
+            now + .45
+        );
+
+
+    oscillator.frequency
+        .linearRampToValueAtTime(
+            500,
+            now + .9
+        );
+
+
+    gain.gain
+        .setValueAtTime(
+            .0001,
+            now
+        );
+
+
+    gain.gain
+        .linearRampToValueAtTime(
+            .25,
+            now + .05
+        );
+
+
+    gain.gain
+        .linearRampToValueAtTime(
+            .0001,
+            now + .95
+        );
+
+
+    oscillator.connect(
+        gain
+    );
+
+
+    gain.connect(
+        audioContext.destination
+    );
+
+
+    oscillator.start(
+        now
+    );
+
+
+    oscillator.stop(
+        now + 1
+    );
+
+}
+
+
+/* =====================================================
+   START ALARM
+===================================================== */
+
+function startEmergencyAlarm(
+    risk
+) {
+
+    document.getElementById(
+        "alertBox"
+    ).classList.add(
+        "emergency-active"
+    );
+
+
+    document.getElementById(
+        "stopAlarmButton"
+    ).style.display =
+        "inline-block";
+
+
+    document.getElementById(
+        "alarmStatus"
+    ).innerText =
+        "🚨 EMERGENCY ALERT — Risk is "
+        +
+        risk
+        +
+        "%";
+
+
+    if (
+        alarmEnabled &&
+        !alarmPlaying
+    ) {
+
+        alarmPlaying =
+            true;
+
+
+        createSirenSound();
+
+
+        alarmTimer =
+            setInterval(
+                createSirenSound,
+                1200
+            );
+
+    }
+
+
+    if (
+        !emergencyAlreadyShown
+    ) {
+
+        emergencyAlreadyShown =
+            true;
+
+
+        alert(
+            "🚨 LANDSLIDE WARNING!\n\n"
+            +
+            "Risk level: "
+            +
+            risk
+            +
+            "%\n\n"
+            +
+            "Please verify the situation and follow official emergency instructions."
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   STOP ALARM
+===================================================== */
+
+function stopEmergencyAlarm() {
+
+    if (
+        alarmTimer
+    ) {
+
+        clearInterval(
+            alarmTimer
+        );
+
+        alarmTimer =
+            null;
+
+    }
+
+
+    alarmPlaying =
+        false;
+
+
+    document.getElementById(
+        "stopAlarmButton"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "alertBox"
+    ).classList.remove(
+        "emergency-active"
+    );
+
+}
+
+
+/* =====================================================
+   STOP ALARM BUTTON
+===================================================== */
+
+document.getElementById(
+    "stopAlarmButton"
+).addEventListener(
+    "click",
+    function() {
+
+        stopEmergencyAlarm();
+
+        document.getElementById(
+            "alarmStatus"
+        ).innerText =
+            "Alarm manually stopped.";
+
+    }
+);
+
+
+/* =====================================================
+   USE MY LOCATION
+===================================================== */
+
+document.getElementById(
+    "locationButton"
+).addEventListener(
+    "click",
+    function() {
+
+        if (
+            !navigator.geolocation
+        ) {
+
+            alert(
+                "Geolocation is not supported."
+            );
+
+            return;
+
+        }
+
+
+        document.getElementById(
+            "locationText"
+        ).innerText =
+            "Detecting...";
+
+
+        navigator.geolocation
+            .getCurrentPosition(
+
+                function(position) {
+
+                    const lat =
+                        position.coords.latitude;
+
+                    const lng =
+                        position.coords.longitude;
+
+
+                    map.setView(
+                        [
+                            lat,
+                            lng
+                        ],
+                        12
+                    );
+
+
+                    selectLocation(
+                        lat,
+                        lng
+                    );
+
+                },
+
+                function(error) {
+
+                    alert(
+                        "Location error: "
+                        +
+                        error.message
+                    );
+
+                }
+
+            );
+
+    }
+);
+
+
+/* =====================================================
+   PHOTO UPLOAD
+===================================================== */
+
+document.getElementById(
+    "photoInput"
+).addEventListener(
+    "change",
+    function(event) {
+
+        const file =
+            event.target.files[0];
+
+
+        if (!file)
+            return;
+
+
+        if (
+            !file.type.startsWith(
+                "image/"
+            )
+        ) {
+
+            alert(
+                "Please upload an image."
+            );
+
+            return;
+
+        }
+
+
+        uploadedImage =
+            file;
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function(e) {
+
+                const preview =
+                    document.getElementById(
+                        "preview"
+                    );
+
+
+                preview.src =
+                    e.target.result;
+
+
+                preview.style.display =
+                    "block";
+
+
+                document.getElementById(
+                    "photoResult"
+                ).style.display =
+                    "none";
+
+            };
+
+
+        reader.readAsDataURL(
+            file
+        );
+
+    }
+);
+
+
+/* =====================================================
+   DEMO AI PHOTO ANALYSIS
+===================================================== */
+
+document.getElementById(
+    "analyzePhotoButton"
+).addEventListener(
+    "click",
+    function() {
+
+        if (
+            !uploadedImage
+        ) {
+
+            alert(
+                "Please upload a landslide photograph first."
+            );
+
+            return;
+
+        }
+
+
+        /*
+            DEMONSTRATION AI.
+
+            A real system should send the image
+            to a computer-vision model.
+
+            This demo generates a result for
+            interface testing.
+        */
+
+
+        const results = [
+
+            {
+                result:
+                    "Possible landslide detected",
+
+                severity:
+                    "HIGH",
+
+                explanation:
+                    "The uploaded image has been submitted for demonstration analysis. A production system should use a trained computer-vision model."
+            },
+
+            {
+                result:
+                    "Possible soil movement detected",
+
+                severity:
+                    "MODERATE",
+
+                explanation:
+                    "Visual indicators may suggest disturbed terrain. Field verification is required."
+            },
+
+            {
+                result:
+                    "Possible debris / slope failure",
+
+                severity:
+                    "CRITICAL",
+
+                explanation:
+                    "Potentially dangerous terrain disturbance detected in this demonstration."
+            }
+
+        ];
+
+
+        const result =
+            results[
+                Math.floor(
+                    Math.random() *
+                    results.length
+                )
+            ];
+
+
+        document.getElementById(
+            "photoResult"
+        ).style.display =
+            "block";
+
+
+        document.getElementById(
+            "aiResult"
+        ).innerText =
+            result.result
+            +
+            " — "
+            +
+            result.severity;
+
+
+        document.getElementById(
+            "aiExplanation"
+        ).innerText =
+            result.explanation;
+
+
+        /*
+            Automatically update severity
+            based on demo AI result.
+        */
+
+        document.getElementById(
+            "severity"
+        ).value =
+            result.severity
+                .toLowerCase();
+
+    }
+);
+
+
+/* =====================================================
+   SUBMIT REPORT
+===================================================== */
+
+document.getElementById(
+    "submitReportButton"
+).addEventListener(
+    "click",
+    function() {
+
+        if (
+            !uploadedImage
+        ) {
+
+            alert(
+                "Please upload a landslide photo."
+            );
+
+            return;
+
+        }
+
+
+        const severity =
+            document.getElementById(
+                "severity"
+            ).value;
+
+
+        const description =
+            document.getElementById(
+                "description"
+            ).value.trim();
+
+
+        const report =
+            {
+
+                image:
+                    document.getElementById(
+                        "preview"
+                    ).src,
+
+                severity:
+                    severity,
+
+                description:
+                    description,
+
+                latitude:
+                    selectedLatitude,
+
+                longitude:
+                    selectedLongitude,
+
+                time:
+                    new Date()
+                        .toLocaleString()
+
+            };
+
+
+        addLandslideMarker(
+            report
+        );
+
+
+        addReportHistory(
+            report
+        );
+
+
+        /*
+            High/Critical reports trigger
+            emergency handling.
+        */
+
+        if (
+            severity === "high"
+            ||
+            severity === "critical"
+        ) {
+
+            startEmergencyAlarm(
+                severity === "critical"
+                    ? 90
+                    : 70
+            );
+
+        }
+
+
+        document.getElementById(
+            "localAlertStatus"
+        ).innerText =
+            "⚠️ Report submitted. Local alert can now be sent.";
+
+
+        alert(
+            "Landslide report submitted successfully."
+        );
+
+    }
+);
+
+
+/* =====================================================
+   MAP LANDSLIDE MARKER
+===================================================== */
+
+function addLandslideMarker(
+    report
+) {
+
+
+    let color;
+
+
+    if (
+        report.severity === "critical"
+    ) {
+
+        color =
+            "#ff304f";
+
+    }
+
+    else if (
+        report.severity === "high"
+    ) {
+
+        color =
+            "#ff8738";
+
+    }
+
+    else if (
+        report.severity === "moderate"
+    ) {
+
+        color =
+            "#ffc857";
+
+    }
+
+    else {
+
+        color =
+            "#00c878";
+
+    }
+
+
+    const icon =
+        L.divIcon({
+
+            className:
+                "",
+
+            html:
+                `
+                <div style="
+                    width:22px;
+                    height:22px;
+                    background:${color};
+                    border:3px solid white;
+                    border-radius:50%;
+                    box-shadow:0 0 10px ${color};
+                "></div>
+                `,
+
+            iconSize:
+                [
+                    22,
+                    22
+                ],
+
+            iconAnchor:
+                [
+                    11,
+                    11
+                ]
+
+        });
+
+
+    const landslideMarker =
+        L.marker(
+
+            [
+                report.latitude,
+                report.longitude
+            ],
+
+            {
+                icon:
+                    icon
+            }
+
+        ).addTo(map);
+
+
+    landslideMarker.bindPopup(
+
+        `
+        <b>🚨 Landslide Report</b>
+
+        <br><br>
+
+        Severity:
+        <strong>
+            ${report.severity.toUpperCase()}
+        </strong>
+
+        <br>
+
+        Location:
+        ${report.latitude.toFixed(5)},
+        ${report.longitude.toFixed(5)}
+
+        <br><br>
+
+        ${report.description || "No description provided."}
+        `
+
+    );
+
+
+    landslideMarkers.push(
+        landslideMarker
+    );
+
+}
+
+
+/* =====================================================
+   REPORT HISTORY
+===================================================== */
+
+function addReportHistory(
+    report
+) {
+
+
+    const history =
+        document.getElementById(
+            "historyList"
+        );
+
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+
+    item.className =
+        "history-item";
+
+
+    item.innerHTML =
+
+        `
+        <div class="history-top">
+
+            <strong>
+                🚨 ${report.severity.toUpperCase()}
+                LANDSLIDE REPORT
+            </strong>
+
+            <span>
+                ${report.time}
+            </span>
+
+        </div>
+
+        <div class="history-location">
+
+            📍
+            ${report.latitude.toFixed(5)},
+            ${report.longitude.toFixed(5)}
+
+        </div>
+
+        <div style="
+            color:#8da2b8;
+            font-size:12px;
+            margin-top:5px;
+        ">
+
+            ${report.description || "No description provided."}
+
+        </div>
+
+        <img
+            class="history-image"
+            src="${report.image}"
+            alt="Reported landslide"
+        >
+
+        `;
+
+
+    history.prepend(
+        item
+    );
+
+}
+
+
+/* =====================================================
+   SEND LOCAL ALERT
+===================================================== */
+
+document.getElementById(
+    "sendLocalAlertButton"
+).addEventListener(
+    "click",
+    function() {
+
+
+        const severity =
+            document.getElementById(
+                "severity"
+            ).value;
+
+
+        const message =
+
+            "🚨 LANDSLIDE WARNING\n\n"
+            +
+            "Severity: "
+            +
+            severity.toUpperCase()
+            +
+            "\n"
+            +
+            "Location: "
+            +
+            selectedLatitude.toFixed(5)
+            +
+            ", "
+            +
+            selectedLongitude.toFixed(5)
+            +
+            "\n\n"
+            +
+            "Please move away from unstable slopes "
+            +
+            "and follow official emergency instructions.";
+
+
+        /*
+            In a real application, this is where
+            you call your backend:
+
+            POST /api/send-local-alert
+
+            The backend can then send:
+
+            - SMS
+            - WhatsApp
+            - Push notifications
+            - Email
+            - Siren commands
+            - Control-room alerts
+        */
+
+
+        document.getElementById(
+            "localAlertStatus"
+        ).innerText =
+
+            "🚨 LOCAL ALERT PREPARED\n\n"
+            +
+            "Severity: "
+            +
+            severity.toUpperCase()
+            +
+            "\n"
+            +
+            "Location: "
+            +
+            selectedLatitude.toFixed(5)
+            +
+            ", "
+            +
+            selectedLongitude.toFixed(5)
+            +
+            "\n\n"
+            +
+            "Message:\n"
+            +
+            message
+            +
+            "\n\n"
+            +
+            "Connect this button to your emergency notification backend to deliver the alert to registered residents.";
+
+
+        /*
+            Also trigger alarm for high severity.
+        */
+
+        if (
+            severity === "high"
+            ||
+            severity === "critical"
+        ) {
+
+            startEmergencyAlarm(
+                severity === "critical"
+                    ? 90
+                    : 70
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   INITIAL LOCATION
+===================================================== */
+
+selectLocation(
+    selectedLatitude,
+    selectedLongitude
+);
+
+</script>
+
+</body>
+
+</html>
+```
