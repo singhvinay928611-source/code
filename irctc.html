@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RailGo - Train Booking</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#f5f7fb;
+    color:#172033;
+}
+
+/* HEADER */
+
+header{
+    height:72px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 7%;
+    border-bottom:1px solid #e4e8ee;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#075cab;
+    font-size:21px;
+    font-weight:bold;
+}
+
+.logoIcon{
+    width:40px;
+    height:40px;
+    background:#075cab;
+    color:white;
+    border-radius:12px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:22px;
+}
+
+nav{
+    display:flex;
+    gap:28px;
+}
+
+nav a{
+    color:#39485a;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:bold;
+}
+
+/* HERO */
+
+.hero{
+    background:
+    linear-gradient(120deg,#06366a,#0867b7);
+
+    min-height:480px;
+
+    padding:65px 7%;
+
+    color:white;
+}
+
+.heroContent{
+    max-width:1150px;
+    margin:auto;
+}
+
+.heroSmall{
+    font-size:11px;
+    letter-spacing:2px;
+    color:#b9daf5;
+    font-weight:bold;
+}
+
+.hero h1{
+    font-size:55px;
+    max-width:720px;
+    line-height:1.05;
+    margin:15px 0;
+}
+
+.hero p{
+    max-width:600px;
+    color:#d9e9f8;
+    line-height:1.6;
+}
+
+/* SEARCH */
+
+.searchBox{
+    margin-top:35px;
+
+    background:white;
+    color:#172033;
+
+    border-radius:18px;
+
+    padding:24px;
+
+    box-shadow:
+    0 20px 50px rgba(0,0,0,.2);
+}
+
+.searchTop{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.trip{
+    padding:8px 15px;
+    border-radius:8px;
+    border:0;
+    background:#eaf3fb;
+    color:#075cab;
+    font-weight:bold;
+}
+
+.searchGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 1fr;
+    gap:14px;
+}
+
+.field label{
+    display:block;
+    color:#68788b;
+    font-size:11px;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+.field input,
+.field select{
+    width:100%;
+    padding:13px;
+    border:1px solid #d8e1eb;
+    border-radius:9px;
+    outline:none;
+    background:white;
+}
+
+.field input:focus,
+.field select:focus{
+    border-color:#075cab;
+}
+
+.searchButton{
+    width:100%;
+    margin-top:18px;
+    padding:14px;
+    border:0;
+    border-radius:9px;
+    background:#075cab;
+    color:white;
+    font-weight:bold;
+    font-size:15px;
+}
+
+.searchButton:hover{
+    background:#064a8c;
+}
+
+/* MAIN */
+
+.container{
+    max-width:1150px;
+    margin:150px auto 70px;
+    padding:0 20px;
+}
+
+.sectionLabel{
+    color:#075cab;
+    font-size:11px;
+    letter-spacing:2px;
+    font-weight:bold;
+}
+
+.sectionTitle{
+    font-size:30px;
+    margin:7px 0 25px;
+}
+
+/* TRAIN CARD */
+
+.trainList{
+    display:grid;
+    gap:14px;
+}
+
+.trainCard{
+    background:white;
+
+    border:1px solid #e0e7ef;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    display:grid;
+
+    grid-template-columns:
+    1.2fr 1fr 1fr auto;
+
+    gap:20px;
+
+    align-items:center;
+}
+
+.trainName{
+    font-weight:bold;
+    font-size:16px;
+}
+
+.trainNumber{
+    color:#77879a;
+    font-size:11px;
+    margin-top:5px;
+}
+
+.times{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.time{
+    font-weight:bold;
+    font-size:18px;
+}
+
+.routeLine{
+    height:1px;
+    background:#cbd5df;
+    flex:1;
+}
+
+.duration{
+    text-align:center;
+    color:#718096;
+    font-size:10px;
+    margin-top:5px;
+}
+
+.classes{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+}
+
+.classBox{
+    background:#f5faff;
+    border:1px solid #d1e1ee;
+    padding:7px;
+    border-radius:7px;
+    font-size:10px;
+}
+
+.classBox strong{
+    color:#075cab;
+}
+
+.price{
+    font-size:18px;
+    font-weight:bold;
+}
+
+.price small{
+    display:block;
+    font-size:9px;
+    color:#78879a;
+}
+
+.bookBtn{
+    margin-top:8px;
+    border:0;
+    border-radius:8px;
+    background:#075cab;
+    color:white;
+    padding:9px 17px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+/* FEATURES */
+
+.features{
+    display:grid;
+    grid-template-columns:
+    repeat(4,1fr);
+
+    gap:12px;
+
+    margin-top:50px;
+}
+
+.feature{
+    background:white;
+    border:1px solid #e0e7ef;
+    border-radius:12px;
+    padding:20px;
+}
+
+.featureIcon{
+    width:35px;
+    height:35px;
+    border-radius:8px;
+    background:#eaf3fb;
+    color:#075cab;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-bottom:10px;
+    font-weight:bold;
+}
+
+.feature h3{
+    font-size:13px;
+    margin-bottom:5px;
+}
+
+.feature p{
+    color:#718096;
+    font-size:11px;
+}
+
+/* BOOKINGS */
+
+.bookingSection{
+    margin-top:80px;
+}
+
+.booking{
+    background:white;
+    border:1px solid #e0e7ef;
+    padding:20px;
+    border-radius:13px;
+    margin-bottom:12px;
+}
+
+.bookingHeader{
+    display:flex;
+    justify-content:space-between;
+}
+
+.status{
+    color:#15915a;
+    font-weight:bold;
+    font-size:11px;
+}
+
+/* MODAL */
+
+.modal{
+    position:fixed;
+    inset:0;
+
+    background:
+    rgba(0,20,40,.65);
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
+
+    z-index:100;
+}
+
+.modal.active{
+    display:flex;
+}
+
+.modalBox{
+    width:100%;
+    max-width:600px;
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    max-height:90vh;
+
+    overflow:auto;
+
+    position:relative;
+}
+
+.close{
+    position:absolute;
+    right:18px;
+    top:15px;
+
+    width:32px;
+    height:32px;
+
+    border:0;
+    border-radius:50%;
+
+    background:#edf1f5;
+
+    font-size:20px;
+}
+
+.modalBox h2{
+    margin:6px 0;
+}
+
+.route{
+    color:#718096;
+    font-size:13px;
+    margin-bottom:22px;
+}
+
+/* STEPS */
+
+.steps{
+    display:flex;
+    gap:10px;
+    margin-bottom:25px;
+}
+
+.step{
+    flex:1;
+    padding-bottom:8px;
+
+    border-bottom:2px solid #e3e8ee;
+
+    color:#9aa7b5;
+
+    font-size:11px;
+
+    font-weight:bold;
+}
+
+.step.active{
+    color:#075cab;
+    border-color:#075cab;
+}
+
+/* FORM */
+
+.formGrid{
+    display:grid;
+    grid-template-columns:
+    2fr 1fr;
+
+    gap:14px;
+}
+
+.formGroup label{
+    display:block;
+    color:#667689;
+    font-size:11px;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+.formGroup input,
+.formGroup select{
+    width:100%;
+    padding:12px;
+    border:1px solid #d8e1eb;
+    border-radius:9px;
+}
+
+/* PAYMENT */
+
+.paymentOption{
+    border:1px solid #d8e1eb;
+    border-radius:12px;
+    padding:15px;
+    margin-bottom:10px;
+}
+
+.paymentOption.selected{
+    border-color:#075cab;
+    background:#f4f9ff;
+}
+
+.paymentOption strong{
+    display:block;
+}
+
+.paymentOption span{
+    display:block;
+    color:#718096;
+    font-size:11px;
+    margin-top:4px;
+}
+
+.upiBox{
+    margin-top:15px;
+    background:#f7f9fc;
+    padding:15px;
+    border-radius:10px;
+}
+
+.upiBox input{
+    width:100%;
+    padding:12px;
+    margin-top:7px;
+    border:1px solid #d5dfe9;
+    border-radius:8px;
+}
+
+/* SUCCESS */
+
+.success{
+    text-align:center;
+}
+
+.successIcon{
+    width:65px;
+    height:65px;
+
+    margin:auto;
+
+    background:#dff5e9;
+
+    color:#138b53;
+
+    border-radius:50%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:32px;
+
+    font-weight:bold;
+}
+
+.ticket{
+    background:#f6f9fc;
+    border:1px solid #dce4ec;
+    padding:18px;
+    border-radius:12px;
+    text-align:left;
+    margin:20px 0;
+}
+
+.ticketRow{
+    display:flex;
+    justify-content:space-between;
+    padding:8px 0;
+    border-bottom:1px solid #e5ebf0;
+}
+
+.ticketRow:last-child{
+    border:0;
+}
+
+.ticketRow span{
+    color:#718096;
+    font-size:10px;
+}
+
+.ticketRow strong{
+    font-size:12px;
+}
+
+.hidden{
+    display:none!important;
+}
+
+/* FOOTER */
+
+footer{
+    background:white;
+    border-top:1px solid #e0e7ef;
+    padding:30px;
+    text-align:center;
+    color:#718096;
+    font-size:11px;
+}
+
+/* MOBILE */
+
+@media(max-width:850px){
+
+    .hero h1{
+        font-size:42px;
+    }
+
+    .searchGrid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .trainCard{
+        grid-template-columns:1fr;
+    }
+
+    .features{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media(max-width:550px){
+
+    header{
+        padding:0 20px;
+    }
+
+    nav{
+        display:none;
+    }
+
+    .hero{
+        padding:45px 20px;
+    }
+
+    .hero h1{
+        font-size:38px;
+    }
+
+    .searchGrid{
+        grid-template-columns:1fr;
+    }
+
+    .searchBox{
+        padding:17px;
+    }
+
+    .container{
+        margin-top:120px;
+    }
+
+    .features{
+        grid-template-columns:1fr;
+    }
+
+    .formGrid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- HEADER -->
+
+<header>
+
+<div class="logo">
+
+<div class="logoIcon">
+↗
+</div>
+
+RailGo
+
+</div>
+
+<nav>
+
+<a href="#search">
+Book Ticket
+</a>
+
+<a href="#trains">
+Trains
+</a>
+
+<a href="#bookings">
+My Bookings
+</a>
+
+</nav>
+
+</header>
+
+
+
+<!-- HERO -->
+
+<section class="hero">
+
+<div class="heroContent">
+
+<div class="heroSmall">
+SMART TRAIN BOOKING
+</div>
+
+<h1>
+Your journey starts here.
+</h1>
+
+<p>
+Search trains across popular Indian routes,
+choose your class, enter passenger details
+and complete your booking with UPI.
+</p>
+
+
+<!-- SEARCH -->
+
+<div class="searchBox" id="search">
+
+<div class="searchTop">
+
+<button class="trip">
+One Way
+</button>
+
+<button
+class="trip"
+style="
+background:white;
+color:#77879a;
+"
+>
+Round Trip
+</button>
+
+</div>
+
+
+<div class="searchGrid">
+
+
+<div class="field">
+
+<label>
+FROM
+</label>
+
+<input
+id="from"
+value="New Delhi"
+placeholder="Departure station"
+/>
+
+</div>
+
+
+<div class="field">
+
+<label>
+TO
+</label>
+
+<input
+id="to"
+value="Mumbai Central"
+placeholder="Arrival station"
+/>
+
+</div>
+
+
+<div class="field">
+
+<label>
+DATE
+</label>
+
+<input
+id="journeyDate"
+type="date"
+/>
+
+</div>
+
+
+<div class="field">
+
+<label>
+CLASS
+</label>
+
+<select id="travelClass">
+
+<option value="">
+All Classes
+</option>
+
+<option value="1A">
+AC First
+</option>
+
+<option value="2A">
+AC 2 Tier
+</option>
+
+<option value="3A">
+AC 3 Tier
+</option>
+
+<option value="SL">
+Sleeper
+</option>
+
+<option value="CC">
+Chair Car
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<button
+class="searchButton"
+onclick="searchTrains()">
+
+Search Trains →
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- MAIN -->
+
+<main class="container">
+
+
+<section id="trains">
+
+<div class="sectionLabel">
+AVAILABLE TRAINS
+</div>
+
+<h2
+class="sectionTitle"
+id="resultTitle">
+
+Popular trains
+
+</h2>
+
+
+<div
+id="trainList"
+class="trainList">
+
+</div>
+
+</section>
+
+
+
+<!-- FEATURES -->
+
+<section class="features">
+
+<div class="feature">
+
+<div class="featureIcon">
+✓
+</div>
+
+<h3>
+Simple booking
+</h3>
+
+<p>
+Search and book in a few steps.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<div class="featureIcon">
+₹
+</div>
+
+<h3>
+UPI payments
+</h3>
+
+<p>
+UPI-first checkout experience.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<div class="featureIcon">
+▣
+</div>
+
+<h3>
+Digital ticket
+</h3>
+
+<p>
+View your booking and PNR.
+</p>
+
+</div>
+
+
+<div class="feature">
+
+<div class="featureIcon">
+⌁
+</div>
+
+<h3>
+Mobile friendly
+</h3>
+
+<p>
+Designed for phone and desktop.
+</p>
+
+</div>
+
+</section>
+
+
+
+<!-- BOOKINGS -->
+
+<section
+id="bookings"
+class="bookingSection">
+
+<div class="sectionLabel">
+MY BOOKINGS
+</div>
+
+<h2 class="sectionTitle">
+Your journeys
+</h2>
+
+<div id="bookingList">
+
+<div class="booking">
+No bookings yet.
+</div>
+
+</div>
+
+</section>
+
+
+</main>
+
+
+
+<footer>
+
+<strong>
+RailGo
+</strong>
+
+<br><br>
+
+Independent train-booking demo.
+<br>
+Not affiliated with Indian Railways,
+IRCTC, CRIS or RailOne.
+
+</footer>
+
+
+
+<!-- BOOKING MODAL -->
+
+<div
+class="modal"
+id="modal">
+
+<div class="modalBox">
+
+<button
+class="close"
+onclick="closeModal()">
+
+×
+</button>
+
+
+<div id="passengerPage">
+
+<div
+style="
+font-size:11px;
+color:#075cab;
+font-weight:bold;
+">
+
+BOOK TICKET
+
+</div>
+
+<h2 id="modalTrain">
+Train
+</h2>
+
+<p
+class="route"
+id="modalRoute">
+Route
+</p>
+
+
+<div class="steps">
+
+<div
+class="step active"
+id="step1">
+
+1 Passenger
+
+</div>
+
+<div
+class="step"
+id="step2">
+
+2 Payment
+
+</div>
+
+<div
+class="step"
+id="step3">
+
+3 Confirmed
+
+</div>
+
+</div>
+
+
+<div class="formGrid">
+
+
+<div class="formGroup">
+
+<label>
+PASSENGER NAME
+</label>
+
+<input
+id="passengerName"
+placeholder="Full name"
+/>
+
+</div>
+
+
+<div class="formGroup">
+
+<label>
+AGE
+</label>
+
+<input
+id="age"
+type="number"
+value="25"
+/>
+
+</div>
+
+
+<div class="formGroup">
+
+<label>
+GENDER
+</label>
+
+<select id="gender">
+
+<option>
+Male
+</option>
+
+<option>
+Female
+</option>
+
+<option>
+Other
+</option>
+
+</select>
+
+</div>
+
+
+<div class="formGroup">
+
+<label>
+BERTH
+</label>
+
+<select id="berth">
+
+<option>
+No Preference
+</option>
+
+<option>
+Lower
+</option>
+
+<option>
+Middle
+</option>
+
+<option>
+Upper
+</option>
+
+<option>
+Side Lower
+</option>
+
+<option>
+Side Upper
+</option>
+
+</select>
+
+</div>
+
+
+<div class="formGroup">
+
+<label>
+TRAVEL CLASS
+</label>
+
+<select id="bookingClass">
+</select>
+
+</div>
+
+</div>
+
+
+<button
+class="searchButton"
+onclick="goPayment()">
+
+Continue to Payment →
+
+</button>
+
+</div>
+
+
+
+<!-- PAYMENT -->
+
+<div
+id="paymentPage"
+class="hidden">
+
+<div
+style="
+font-size:11px;
+color:#075cab;
+font-weight:bold;
+">
+
+PAYMENT
+
+</div>
+
+<h2>
+Choose Payment
+</h2>
+
+
+<br>
+
+
+<div class="paymentOption selected">
+
+<strong>
+UPI
+</strong>
+
+<span>
+Google Pay · PhonePe · Paytm · BHIM
+</span>
+
+</div>
+
+
+<div class="upiBox">
+
+<label
+style="
+font-size:11px;
+font-weight:bold;
+">
+
+UPI ID
+
+</label>
+
+<input
+id="upiId"
+placeholder="example@upi"
+/>
+
+</div>
+
+
+<button
+class="searchButton"
+onclick="makePayment()">
+
+Pay ₹<span id="amount">
+0
+</span>
+
+</button>
+
+
+<p
+style="
+font-size:10px;
+color:#718096;
+margin-top:12px;
+line-height:1.5;
+">
+
+This is a simulated payment screen.
+For production, connect this button to a
+licensed payment gateway and verify the
+payment server-side.
+
+</p>
+
+</div>
+
+
+
+<!-- SUCCESS -->
+
+<div
+id="successPage"
+class="hidden success">
+
+<div class="successIcon">
+✓
+</div>
+
+<br>
+
+<h2>
+Booking Confirmed
+</h2>
+
+<p
+style="
+color:#718096;
+font-size:13px;
+margin-top:8px;
+">
+
+Your journey has been booked successfully.
+
+</p>
+
+
+<div class="ticket">
+
+<div class="ticketRow">
+
+<span>
+PNR
+</span>
+
+<strong id="pnr">
+0000000000
+</strong>
+
+</div>
+
+
+<div class="ticketRow">
+
+<span>
+TRAIN
+</span>
+
+<strong id="ticketTrain">
+-
+</strong>
+
+</div>
+
+
+<div class="ticketRow">
+
+<span>
+PASSENGER
+</span>
+
+<strong id="ticketPassenger">
+-
+</strong>
+
+</div>
+
+
+<div class="ticketRow">
+
+<span>
+STATUS
+</span>
+
+<strong
+style="color:#138b53">
+
+CONFIRMED
+
+</strong>
+
+</div>
+
+</div>
+
+
+<button
+class="searchButton"
+onclick="closeModal()">
+
+Done
+
+</button>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/* ============================
+   TRAIN DATABASE
+============================ */
+
+const trains = [
+
+{
+id:"12952",
+name:"Mumbai Rajdhani",
+from:"New Delhi",
+to:"Mumbai Central",
+departure:"16:55",
+arrival:"08:35",
+duration:"15h 40m",
+
+classes:{
+"1A":4550,
+"2A":2750,
+"3A":1950
+}
+
+},
+
+{
+id:"12954",
+name:"August Kranti Rajdhani",
+from:"Mumbai Central",
+to:"New Delhi",
+departure:"17:10",
+arrival:"09:43",
+duration:"16h 33m",
+
+classes:{
+"1A":4500,
+"2A":2700,
+"3A":1900
+}
+
+},
+
+{
+id:"12904",
+name:"Golden Temple Mail",
+from:"Mumbai Central",
+to:"New Delhi",
+departure:"18:45",
+arrival:"16:05",
+duration:"21h 20m",
+
+classes:{
+"2A":2450,
+"3A":1700,
+"SL":640
+}
+
+},
+
+{
+id:"12137",
+name:"Punjab Mail",
+from:"Mumbai Central",
+to:"New Delhi",
+departure:"19:40",
+arrival:"19:35",
+duration:"23h 55m",
+
+classes:{
+"2A":2250,
+"3A":1570,
+"SL":590
+}
+
+},
+
+{
+id:"12002",
+name:"Bhopal Shatabdi",
+from:"New Delhi",
+to:"Bhopal",
+departure:"06:00",
+arrival:"14:00",
+duration:"8h",
+
+classes:{
+"CC":1050,
+"EC":1900
+}
+
+},
+
+{
+id:"12628",
+name:"Karnataka Express",
+from:"New Delhi",
+to:"Bengaluru",
+departure:"21:15",
+arrival:"05:30",
+duration:"32h 15m",
+
+classes:{
+"2A":3200,
+"3A":2250,
+"SL":830
+}
+
+},
+
+{
+id:"12434",
+name:"Chennai Rajdhani",
+from:"New Delhi",
+to:"Chennai",
+departure:"15:55",
+arrival:"20:40",
+duration:"28h 45m",
+
+classes:{
+"1A":5200,
+"2A":3150,
+"3A":2250
+}
+
+}
+
+];
+
+
+let selectedTrain = null;
+let selectedFare = 0;
+
+
+/* ============================
+   SEARCH TRAINS
+============================ */
+
+function searchTrains(){
+
+let from =
+document.getElementById("from")
+.value
+.toLowerCase();
+
+let to =
+document.getElementById("to")
+.value
+.toLowerCase();
+
+let selectedClass =
+document.getElementById("travelClass")
+.value;
+
+
+let results =
+trains.filter(train =>
+
+train.from
+.toLowerCase()
+.includes(from)
+
+&&
+
+train.to
+.toLowerCase()
+.includes(to)
+
+);
+
+
+if(
+from === "" ||
+to === ""
+){
+
+results = trains;
+
+}
+
+
+/* If route isn't in demo database */
+
+if(results.length === 0){
+
+results = trains;
+
+}
+
+
+if(selectedClass !== ""){
+
+results =
+results.filter(train =>
+train.classes[selectedClass]
+);
+
+}
+
+
+document.getElementById(
+"resultTitle"
+).innerText =
+
+results.length +
+" trains available";
+
+
+displayTrains(results);
+
+}
+
+
+/* ============================
+   DISPLAY TRAINS
+============================ */
+
+function displayTrains(list){
+
+const container =
+document.getElementById(
+"trainList"
+);
+
+
+container.innerHTML = "";
+
+
+if(list.length === 0){
+
+container.innerHTML = `
+
+<div class="booking">
+
+No trains found.
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+list.forEach(train => {
+
+
+let classes = "";
+
+
+Object.entries(
+train.classes
+).forEach(
+([cls,fare]) => {
+
+classes += `
+
+<div class="classBox">
+
+${cls}
+
+<br>
+
+<strong>
+₹${fare.toLocaleString("en-IN")}
+</strong>
+
+</div>
+
+`;
+
+});
+
+
+let fares =
+Object.values(train.classes);
+
+let lowest =
+Math.min(...fares);
+
+
+container.innerHTML += `
+
+<article class="trainCard">
+
+
+<div>
+
+<div class="trainName">
+
+${train.name}
+
+</div>
+
+<div class="trainNumber">
+
+${train.id}
+
+·
+
+${train.from}
+
+→
+
+${train.to}
+
+</div>
+
+</div>
+
+
+<div>
+
+<div class="times">
+
+<span class="time">
+
+${train.departure}
+
+</span>
+
+<span class="routeLine">
+</span>
+
+<span class="time">
+
+${train.arrival}
+
+</span>
+
+</div>
+
+<div class="duration">
+
+${train.duration}
+
+</div>
+
+</div>
+
+
+<div class="classes">
+
+${classes}
+
+</div>
+
+
+<div>
+
+<div class="price">
+
+₹${lowest.toLocaleString("en-IN")}
+
+<small>
+Starting fare
+</small>
+
+</div>
+
+
+<button
+class="bookBtn"
+onclick="openBooking('${train.id}')">
+
+Book
+
+</button>
+
+</div>
+
+
+</article>
+
+`;
+
+});
+
+}
+
+
+/* ============================
+   OPEN BOOKING
+============================ */
+
+function openBooking(id){
+
+selectedTrain =
+trains.find(
+train => train.id === id
+);
+
+
+document.getElementById(
+"modal"
+).classList.add("active");
+
+
+document.getElementById(
+"modalTrain"
+).innerText =
+
+selectedTrain.name +
+" · " +
+selectedTrain.id;
+
+
+document.getElementById(
+"modalRoute"
+).innerText =
+
+selectedTrain.from +
+" " +
+selectedTrain.departure +
+" → " +
+selectedTrain.to +
+" " +
+selectedTrain.arrival;
+
+
+let classSelect =
+document.getElementById(
+"bookingClass"
+);
+
+
+classSelect.innerHTML = "";
+
+
+Object.entries(
+selectedTrain.classes
+).forEach(
+([cls,fare]) => {
+
+classSelect.innerHTML += `
+
+<option value="${cls}">
+
+${cls}
+-
+₹${fare.toLocaleString("en-IN")}
+
+</option>
+
+`;
+
+});
+
+
+showStep(1);
+
+}
+
+
+/* ============================
+   PAYMENT
+============================ */
+
+function goPayment(){
+
+let name =
+document.getElementById(
+"passengerName"
+).value.trim();
+
+
+if(name === ""){
+
+alert(
+"Please enter passenger name."
+);
+
+return;
+
+}
+
+
+let cls =
+document.getElementById(
+"bookingClass"
+).value;
+
+
+selectedFare =
+selectedTrain.classes[cls];
+
+
+document.getElementById(
+"amount"
+).innerText =
+selectedFare.toLocaleString(
+"en-IN"
+);
+
+
+showStep(2);
+
+}
+
+
+/* ============================
+   MAKE PAYMENT
+============================ */
+
+function makePayment(){
+
+let upi =
+document.getElementById(
+"upiId"
+).value.trim();
+
+
+if(
+!upi ||
+!upi.includes("@")
+){
+
+alert(
+"Please enter a valid UPI ID."
+);
+
+return;
+
+}
+
+
+/*
+   DEMO PAYMENT
+
+   A real application should:
+   1. Create payment order on backend
+   2. Open payment gateway
+   3. Receive webhook
+   4. Verify transaction
+   5. Confirm railway booking
+*/
+
+
+let pnr =
+Math.floor(
+1000000000 +
+Math.random() *
+9000000000
+).toString();
+
+
+let passenger =
+document.getElementById(
+"passengerName"
+).value;
+
+
+document.getElementById(
+"pnr"
+).innerText = pnr;
+
+
+document.getElementById(
+"ticketTrain"
+).innerText =
+selectedTrain.name;
+
+
+document.getElementById(
+"ticketPassenger"
+).innerText =
+passenger;
+
+
+/* Save booking */
+
+let bookings =
+JSON.parse(
+localStorage.getItem(
+"railgoBookings"
+) || "[]"
+);
+
+
+bookings.push({
+
+pnr:pnr,
+
+train:selectedTrain.name,
+
+trainNumber:selectedTrain.id,
+
+from:selectedTrain.from,
+
+to:selectedTrain.to,
+
+passenger:passenger,
+
+date:
+document.getElementById(
+"journeyDate"
+).value,
+
+fare:selectedFare,
+
+status:"CONFIRMED"
+
+});
+
+
+localStorage.setItem(
+"railgoBookings",
+JSON.stringify(bookings)
+);
+
+
+showStep(3);
+
+loadBookings();
+
+}
+
+
+/* ============================
+   MODAL STEPS
+============================ */
+
+function showStep(step){
+
+document.getElementById(
+"passengerPage"
+).classList.add(
+"hidden"
+);
+
+document.getElementById(
+"paymentPage"
+).classList.add(
+"hidden"
+);
+
+document.getElementById(
+"successPage"
+).classList.add(
+"hidden"
+);
+
+
+document.getElementById(
+"step1"
+).classList.remove(
+"active"
+);
+
+document.getElementById(
+"step2"
+).classList.remove(
+"active"
+);
+
+document.getElementById(
+"step3"
+).classList.remove(
+"active"
+);
+
+
+if(step === 1){
+
+document.getElementById(
+"passengerPage"
+).classList.remove(
+"hidden"
+);
+
+}
+
+
+if(step === 2){
+
+document.getElementById(
+"paymentPage"
+).classList.remove(
+"hidden"
+);
+
+}
+
+
+if(step === 3){
+
+document.getElementById(
+"successPage"
+).classList.remove(
+"hidden"
+);
+
+}
+
+
+document.getElementById(
+"step" + step
+).classList.add(
+"active"
+);
+
+}
+
+
+/* ============================
+   CLOSE
+============================ */
+
+function closeModal(){
+
+document.getElementById(
+"modal"
+).classList.remove(
+"active"
+);
+
+}
+
+
+/* ============================
+   BOOKINGS
+============================ */
+
+function loadBookings(){
+
+let bookings =
+JSON.parse(
+localStorage.getItem(
+"railgoBookings"
+) || "[]"
+);
+
+
+let container =
+document.getElementById(
+"bookingList"
+);
+
+
+if(bookings.length === 0){
+
+container.innerHTML = `
+
+<div class="booking">
+
+No bookings yet.
+
+</div>
+
+`;
+
+return;
+
+}
+
+
+container.innerHTML = "";
+
+
+bookings
+.reverse()
+.forEach(
+booking => {
+
+container.innerHTML += `
+
+<div class="booking">
+
+<div class="bookingHeader">
+
+<div>
+
+<strong>
+${booking.train}
+</strong>
+
+<br>
+
+<span
+style="
+font-size:11px;
+color:#718096;
+">
+
+${booking.from}
+→
+${booking.to}
+
+</span>
+
+</div>
+
+
+<div class="status">
+
+${booking.status}
+
+</div>
+
+</div>
+
+
+<hr
+style="
+border:0;
+border-top:1px solid #e4e9ef;
+margin:14px 0;
+">
+
+
+<div
+style="
+display:flex;
+justify-content:space-between;
+gap:10px;
+flex-wrap:wrap;
+font-size:12px;
+">
+
+<span>
+
+PNR:
+
+<strong>
+${booking.pnr}
+</strong>
+
+</span>
+
+
+<span>
+
+Passenger:
+
+<strong>
+${booking.passenger}
+</strong>
+
+</span>
+
+
+<span>
+
+₹${booking.fare.toLocaleString("en-IN")}
+
+</span>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+/* ============================
+   DEFAULT DATE
+============================ */
+
+let tomorrow =
+new Date(
+Date.now() +
+86400000
+);
+
+document.getElementById(
+"journeyDate"
+).value =
+tomorrow
+.toISOString()
+.split("T")[0];
+
+
+/* ============================
+   START
+============================ */
+
+searchTrains();
+
+loadBookings();
+
+</script>
+
+</body>
+</html>
